@@ -96,7 +96,7 @@ export default function Dashboard() {
                     style={{ aspectRatio: "16 / 11" }}
                   >
                     <img
-                      src={island.image}
+                      src={`/assets/islands/atlas/${island.id}.webp`}
                       alt={island.name}
                       className="w-full h-full object-cover"
                       loading="lazy"

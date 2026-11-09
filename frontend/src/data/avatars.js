@@ -3,7 +3,12 @@ export const AVATARS = [
   { id: "explorer-02", name: "The Wayfinder", description: "A field explorer with a broad-brimmed hat and an eye for uncharted trails." },
   { id: "explorer-03", name: "The Archivist", description: "A sharp-eyed scholar who notices the details others sail past." },
   { id: "explorer-04", name: "The Tidewatcher", description: "A hooded navigator who keeps watch when the fog rolls in." },
-].map(avatar => ({ ...avatar, src: `/assets/avatars/${avatar.id}.webp` }));
+].map(avatar => ({
+  ...avatar,
+  src: `/assets/avatars/wardrobe/${avatar.id}.webp`,
+  iconSrc: `/assets/avatars/wardrobe/icons/${avatar.id}.webp`,
+  mapSrc: `/assets/avatars/${avatar.id}.webp`,
+}));
 
 export function resolveAvatar(saved) {
   const base = typeof saved === "string" ? saved : saved?.base;

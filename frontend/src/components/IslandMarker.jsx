@@ -98,7 +98,7 @@ export default function IslandMarker({
         >
           {!imgError ? (
             <img
-              src={island.image}
+              src={`/assets/islands/atlas/markers/${island.id}.webp`}
               alt=""
               width={50}
               height={50}

@@ -15,7 +15,7 @@ export function MapExplorer({ avatar, position }) {
       <span className="map-explorer-pennant" aria-hidden="true">
         {failedId === equipped.id
           ? <Compass className="h-full w-full p-1 text-ink" />
-          : <img src={equipped.src} alt="" draggable={false} onError={() => setFailedId(equipped.id)} />}
+          : <img src={equipped.mapSrc} alt="" draggable={false} onError={() => setFailedId(equipped.id)} />}
       </span>
     </div>
   );

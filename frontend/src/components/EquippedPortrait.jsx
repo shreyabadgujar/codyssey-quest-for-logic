@@ -1,19 +1,15 @@
 import { useState } from "react";
-import { Bird, Compass, Feather, PawPrint } from "lucide-react";
+import { Compass, PawPrint } from "lucide-react";
+import { equipmentArtwork } from "../data/equipmentArtwork.js";
 import { AvatarArtwork } from "./AvatarArtwork.jsx";
+import { PortraitFrame } from "./PortraitFrame.jsx";
 
 const placement = {
-  "explorer-01": { pin: "64%", companion: "71%" },
-  "explorer-02": { pin: "73%", companion: "70%" },
-  "explorer-03": { pin: "61%", companion: "74%" },
-  "explorer-04": { pin: "69%", companion: "73%" },
+  "explorer-01": { pin: { left: "65%", top: "49%" }, companion: { bottom: "9%" } },
+  "explorer-02": { pin: { left: "64%", top: "51%" }, companion: { bottom: "8%" } },
+  "explorer-03": { pin: { left: "63%", top: "45%" }, companion: { bottom: "8%" } },
+  "explorer-04": { pin: { left: "64%", top: "44%" }, companion: { bottom: "9%" } },
 };
-const frameFinishes = {
-  gold: "border-brass bg-parchment-dark",
-  silver: "border-sea bg-parchment-light",
-  royal: "border-brass-light bg-olive-dark",
-};
-const emblems = { owl: Bird, fox: PawPrint, raven: Feather };
 
 export function EquippedPortrait({ avatar, equipment }) {
   const { frame, background, pin, companion } = equipment;
@@ -22,35 +18,37 @@ export function EquippedPortrait({ avatar, equipment }) {
     return <div className="mx-auto max-w-48"><AvatarArtwork avatar={avatar} /></div>;
   }
 
-  const offsets = placement[avatar.id] ?? { pin: "66%", companion: "72%" };
+  const offsets = placement[avatar.id] ?? placement["explorer-01"];
+  const backgroundArt = background && equipmentArtwork(background);
+  const pinArt = pin && equipmentArtwork(pin);
+  const companionArt = companion && equipmentArtwork(companion);
   const usable = asset => asset && !failedAssets[asset];
   const fail = asset => setFailedAssets(previous => ({ ...previous, [asset]: true }));
-  const Companion = emblems[companion?.visual] ?? PawPrint;
-  const frameStyle = frame ? frameFinishes[frame.visual] ?? frameFinishes.gold : "";
 
   return (
-    <div className="relative isolate mx-auto max-w-sm overflow-hidden border border-ink/25 bg-parchment-light/40 px-3 py-4"
+    <div className="relative isolate mx-auto max-w-sm overflow-hidden border border-ink/25 bg-parchment-light px-3 py-4"
       role="group" aria-label={`${avatar.name} with equipment`}>
-      {background && usable(background.asset) && (
-        <img src={background.asset} alt={background.name} onError={() => fail(background.asset)}
+      {usable(backgroundArt) && (
+        <img src={backgroundArt} alt={background.name} onError={() => fail(backgroundArt)}
           className="absolute inset-0 -z-10 h-full w-full object-cover" />
       )}
-      <div className={`relative mx-auto w-[62%] max-w-48 ${frame ? "border-[6px] border-double p-1 shadow-paper " + frameStyle : ""}`}
-        aria-label={frame?.name}>
-        <AvatarArtwork avatar={avatar} />
-      </div>
-      {pin && (
-        <span role="img" aria-label={pin.name} style={{ top: offsets.pin }}
-          className="absolute left-[3%] grid aspect-square w-[19%] max-w-16 -translate-y-1/2 place-items-center rounded-full border border-brass bg-parchment p-1 shadow-paper">
-          {usable(pin.asset)
-            ? <img src={pin.asset} alt="" className="h-full w-full object-contain" onError={() => fail(pin.asset)} />
-            : <Compass className="h-2/3 w-2/3 text-sepia" aria-hidden="true" />}
-        </span>
-      )}
+      <PortraitFrame frame={frame} className="mx-auto w-[62%] max-w-48">
+        <AvatarArtwork avatar={avatar} layered />
+        {pin && (
+          <span role="img" aria-label={pin.name} style={offsets.pin}
+            className="absolute grid aspect-square w-[14%] -translate-x-1/2 -translate-y-1/2 place-items-center">
+            {usable(pinArt)
+              ? <img src={pinArt} alt="" className="absolute inset-0 h-full w-full object-contain drop-shadow" onError={() => fail(pinArt)} />
+              : <Compass className="h-full w-full text-brass-light" aria-hidden="true" />}
+          </span>
+        )}
+      </PortraitFrame>
       {companion && (
-        <span role="img" aria-label={companion.name} style={{ top: offsets.companion }}
-          className="absolute right-[3%] grid aspect-square w-[18%] max-w-16 -translate-y-1/2 place-items-center rounded-full border-4 border-double border-brass bg-parchment text-olive-dark shadow-paper">
-          <Companion className="h-3/5 w-3/5" aria-hidden="true" />
+        <span role="img" aria-label={companion.name} style={offsets.companion}
+          className="absolute right-[2%] grid aspect-square w-[27%] max-w-24 place-items-end">
+          {usable(companionArt)
+            ? <img src={companionArt} alt="" className="absolute inset-0 h-full w-full object-contain object-bottom drop-shadow" onError={() => fail(companionArt)} />
+            : <PawPrint className="mx-auto h-1/2 w-1/2 text-olive-dark" aria-hidden="true" />}
         </span>
       )}
     </div>

@@ -19,7 +19,7 @@ export default function AvatarPreview({ avatar, size = 64, className = "" }) {
     >
       {equipped && failedId !== equipped.id ? (
         <img
-          src={equipped.src}
+          src={equipped.iconSrc}
           alt={equipped.name}
           width={size}
           height={size}

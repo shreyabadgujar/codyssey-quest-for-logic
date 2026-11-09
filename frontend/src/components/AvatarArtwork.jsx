@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Compass } from "lucide-react";
 
-export function AvatarArtwork({ avatar }) {
+export function AvatarArtwork({ avatar, layered = false }) {
   const [failedId, setFailedId] = useState(null);
   return (
-    <span className="block aspect-[2/3] overflow-hidden border border-ink/50 bg-parchment-light">
+    <span className={`block aspect-[2/3] overflow-hidden ${layered ? "" : "border border-ink/50 bg-parchment-light"}`}>
       {failedId === avatar.id
         ? <span className="grid h-full place-content-center justify-items-center gap-2 p-2 text-center text-sepia">
             <Compass size={24} aria-hidden="true" />
