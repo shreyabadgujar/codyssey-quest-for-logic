@@ -21,9 +21,9 @@ export function getIslandProgress(islandId) {
   const levels = island?.levels || [];
   const completed = levels.filter(l => l.status === "completed").map(l => l.level);
   const unlocked = levels.filter(l => l.status !== "locked").map(l => l.level);
-  const totalLevels = island?.totalLevels ?? (islandId === "array-archipelago" ? 15 : 5);
+  const totalLevels = island?.totalLevels ?? ISLANDS.find(entry => entry.id === islandId)?.totalLevels ?? 0;
   return { completed, unlocked: island ? unlocked : [1], completedCount: completed.length, totalLevels,
-    isCompleted: completed.length >= totalLevels, lastCompletedAt: island?.lastCompletedAt };
+    isCompleted: totalLevels > 0 && completed.length >= totalLevels, lastCompletedAt: island?.lastCompletedAt };
 }
 export function getLevelStatus(islandId, level) {
   const p = getIslandProgress(islandId);

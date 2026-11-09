@@ -1,19 +1,55 @@
 const limits = { cpu: 4, wall: 15, memory: 262144 };
 
-function program(language, body) {
+function program(language, body, fast = false) {
   if (language === "cpp") return '#include <bits/stdc++.h>\nusing namespace std;\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n' + body + '\n}\n';
+  if (language === "java" && fast) return `import java.io.*;
+import java.util.*;
+public class Main {
+    static final InputStream in = new BufferedInputStream(System.in);
+    static final byte[] buffer = new byte[65536];
+    static int size, pos;
+    static int read() throws IOException {
+        if (size < 0) return -1;
+        if (pos == size) {
+            size = in.read(buffer);
+            pos = 0;
+            if (size < 0) return -1;
+        }
+        return buffer[pos++];
+    }
+    static String token() throws IOException {
+        int c;
+        do { c = read(); } while (c >= 0 && c <= 32);
+        if (c < 0) return null;
+        StringBuilder word = new StringBuilder();
+        do { word.append((char)c); c = read(); } while (c > 32);
+        return word.toString();
+    }
+    static long num() throws IOException {
+        int c;
+        do { c = read(); } while (c >= 0 && c <= 32);
+        boolean neg = c == '-';
+        if (neg) c = read();
+        long value = 0;
+        while (c > 32) { value = value * 10 + c - '0'; c = read(); }
+        return neg ? -value : value;
+    }
+    static int integer() throws IOException { return (int)num(); }
+    public static void main(String[] args) throws Exception {
+` + body + '\n    }\n}\n';
   if (language === "java") return 'import java.util.*;\npublic class Main {\n    public static void main(String[] args) {\n        Scanner in = new Scanner(System.in);\n' + body + '\n    }\n}\n';
   return 'import sys\n\n' + body + '\n';
 }
 
-function makeBank(island, specs) {
-  if (specs.length !== 5) throw new Error("Each expansion island requires five missions");
+function makeBank(island, specs, startLevel = 1) {
+  const hard = startLevel === 6;
+  if (specs.length !== (hard ? 3 : 5)) throw new Error("Unexpected island mission count");
   const missions = specs.map((spec, index) => {
-    const level = index + 1;
+    const level = index + startLevel;
     const stage = level < 3 ? "Explorer" : level < 5 ? "Detective" : "Mastermind";
     const difficulty = level < 3 ? "apprentice" : level < 5 ? "journeyman" : "master";
     const sampleTestCases = spec.samples.map(([input, expectedOutput, explanation]) => {
-      if (spec.oracle(input).trimEnd() !== expectedOutput.trimEnd()) {
+      if (spec.oracle && spec.oracle(input).trimEnd() !== expectedOutput.trimEnd()) {
         throw new Error(island.slug + " sample mismatch in Q" + level);
       }
       return { input, expectedOutput, explanation };
@@ -23,7 +59,7 @@ function makeBank(island, specs) {
       return { input, expectedOutput };
     });
     const languages = ["cpp", "java", "python"];
-    const wrap = (key) => Object.fromEntries(languages.map((lang, i) => [lang, program(lang, spec[key][i])]));
+    const wrap = (key) => Object.fromEntries(languages.map((lang, i) => [lang, program(lang, spec[key][i], hard)]));
     return {
       level, slug: island.slug + "-" + level, stage, difficulty,
       title: spec.title, introduction: spec.intro, description: spec.statement,
@@ -36,6 +72,6 @@ function makeBank(island, specs) {
       validator: "exact", executionLimits: limits,
     };
   });
-  return { island: { ...island, totalLevels: 5 }, missions };
+  return { island: { ...island, totalLevels: startLevel + specs.length - 1 }, missions };
 }
 module.exports = { makeBank };

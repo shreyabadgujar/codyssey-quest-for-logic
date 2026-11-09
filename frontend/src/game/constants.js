@@ -5,4 +5,4 @@ export const LANGUAGES = [
   { key: "java", label: "Java", monaco: "java" },
 ];
 export const DIFFICULTIES = ["apprentice", "journeyman", "master"];
-export const DEFAULT_LEVELS_PER_ISLAND = 5; // TODO: tune per island when missions are authored
+export const DEFAULT_LEVELS_PER_ISLAND = 8;

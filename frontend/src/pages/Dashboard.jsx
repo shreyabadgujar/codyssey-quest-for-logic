@@ -127,7 +127,7 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between text-xs">
                     <span className="annotation text-[11px] text-sepia">Cleared:</span>
                     <span className="font-display font-medium text-ink">
-                      {p.completedCount} / {island.totalLevels} Cases
+                      {p.completedCount} / {p.totalLevels} Cases
                     </span>
                   </div>
 
@@ -135,7 +135,7 @@ export default function Dashboard() {
                   <div className="h-1.5 w-full bg-parchment-dark/50 rounded-full overflow-hidden border border-ink/20">
                     <div
                       className="h-full bg-olive-dark transition-all duration-300"
-                      style={{ width: `${(p.completedCount / island.totalLevels) * 100}%` }}
+                      style={{ width: `${(p.completedCount / p.totalLevels) * 100}%` }}
                     />
                   </div>
 
