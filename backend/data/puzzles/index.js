@@ -1,4 +1,5 @@
-const bank = ["detective", "arrangement", "cipher", "maze", "workshop", "code"].flatMap(file => require("./" + file));
+const original = ["detective", "arrangement", "cipher", "maze", "workshop", "code"].flatMap(file => require("./" + file));
+const bank = [...original, ...require("./expansion"), ...require("./arrayArchipelago")];
 const byId = new Map(bank.map(puzzle => [puzzle.id, puzzle]));
 function playable(puzzle) {
   const { solution, hints, explanation, data, ...info } = puzzle;

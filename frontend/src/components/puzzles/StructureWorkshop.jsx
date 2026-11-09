@@ -18,6 +18,15 @@ function simulate(data, ids) {
     const {action,value,index}=data.ops.find(op=>op.id===id);
     if (["push","enqueue"].includes(action)) cells.push(value);
     if (action==="pop") cells.length ? notes.push(cells.pop()) : invalid=i;
+    if (action==="peek") cells.length ? notes.push(cells.at(-1)) : invalid=i;
+    if (action==="duplicate") cells.length ? cells.push(cells.at(-1)) : invalid=i;
+    if (action==="swap") {
+      if (cells.length < 2) invalid=i;
+      else {
+        const last = cells.length - 1;
+        [cells[last], cells[last - 1]] = [cells[last - 1], cells[last]];
+      }
+    }
     if (action==="dequeue") cells.length ? notes.push(cells.shift()) : invalid=i;
     if (action==="delete") index<cells.length ? notes.push(cells.splice(index,1)[0]) : invalid=i;
     if (action==="insert" && data.type!=="tree") index<=cells.length ? cells.splice(index,0,value) : invalid=i;

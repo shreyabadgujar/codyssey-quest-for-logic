@@ -54,7 +54,7 @@ The archive unlocks one puzzle per two distinct successfully rewarded coding mis
 
 | Method | Path | Behavior |
 | --- | --- | --- |
-| GET | `/api/puzzles` | Assigns any earned but unassigned milestones, then returns `catalogue`, `current`, newest-first `history`, `missionsCompleted`, `missionsToNext` and `exhausted`. Assignments are persisted; concurrent requests cannot reroll them. |
+| GET | `/api/puzzles` | Assigns earned milestones and returns `catalogue`, `current`, newest-first `history`, `missionsCompleted`, `missionsTotal`, `missionsToNext`, `nextReachable` and `exhausted`. Assignments are persisted and cannot reroll. |
 | GET | `/api/puzzles/:id` | Reads a player-owned session and its public puzzle data, draft, revision, unlocked hints and verdict. Solution explanation appears only after completion. |
 | POST | `/api/puzzles/:id/start` | Activates or resumes a session. Also revisits a skipped puzzle and restores its draft. |
 | POST | `/api/puzzles/:id/draft` | Saves the mechanic-specific draft. Body: `{ revision, draft }`. |
@@ -65,4 +65,4 @@ The archive unlocks one puzzle per two distinct successfully rewarded coding mis
 
 Other POST bodies are `{ revision }`; revisions come from the latest session response. A stale write returns `409 PUZZLE_CONFLICT`; reload to resume the server's saved state. Invalid or unowned session IDs return `404 PUZZLE_NOT_FOUND`. Journal activity may include `{ kind: "puzzle", coins, ... }`.
 
-Each `catalogue` entry contains `puzzleId`, `title`, `islandId`, `islandName`, `difficulty`, `synopsis`, `mechanic` and `status`. Assigned entries also contain the signed-in player's `sessionId` and `sessionStatus`. An assigned trial is `available` (including active and skipped) or `completed`. An unassigned trial is `upcoming` only when one successful mission remains and the trial is a candidate for the next draw. Other unassigned trials are `locked`. Upcoming and locked entries are previews and have no session ID. When `exhausted` is true, there is no further draw.
+Each `catalogue` entry contains `puzzleId`, `title`, `islandId`, `islandName`, `difficulty`, `synopsis`, `mechanic` and `status`. New entries also include concept `tags`. Assigned entries include the signed-in player's `sessionId` and `sessionStatus`. An assigned trial is `available` (including active and skipped) or `completed`. An unassigned trial is `upcoming` when the next draw is reachable with one remaining successful mission and the trial is a candidate for that draw. Other unassigned trials are `locked`. Upcoming and locked entries are previews and have no session ID. `nextReachable` compares the next milestone with the published mission count. `exhausted` indicates that every selectable puzzle has been assigned.

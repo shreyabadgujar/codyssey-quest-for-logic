@@ -5,8 +5,10 @@ function follow(data, moves) {
   for (const move of moves) {
     if (move==="activate") { const bit=data.switches[data.grid[row][col]]; if (!bit || flags&bit || cost>=data.budget) break; flags|=bit; cost++; continue; }
     const [, , dr, dc]=directions.find(item => item[0]===move);
+    const tile=data.grid[row+dr]?.[col+dc];
+    if (!tile || tile==="#" || (data.gates[tile] && !(flags & data.gates[tile])) ||
+        cost+(data.weights[tile] || 1)>data.budget) break;
     row+=dr; col+=dc;
-    const tile=data.grid[row][col];
     cost+=data.weights[tile] || 1; flags|=data.checkpoints[tile] || 0;
     path.push([row,col]);
   }
@@ -42,7 +44,7 @@ export function ExpeditionMaze({data,draft,edit}) {
     </div>
     <div className="pz-readout">Objectives: {Object.entries({...data.switches,...data.checkpoints}).map(([tile,bit]) =>
       <span className="pz-objective" key={tile}>{tile} {flags&bit ? "✓" : "○"}{data.required&bit ? "" : " (optional)"}</span>)}</div>
-    <p className="pz-small">S start · X exit · # wall · ~ weighted terrain · lowercase switch · uppercase gate/checkpoint</p>
+    <p className="pz-small">S start · X exit · # wall · {Object.entries(data.weights).map(([tile, energy]) => tile+" "+energy+" energy").join(" · ") || "ordinary tiles cost one energy"} · lowercase switch · uppercase gate/checkpoint</p>
   </div>;
 }
 

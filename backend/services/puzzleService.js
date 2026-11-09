@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const PuzzleSession = require("../models/PuzzleSession");
 const Island = require("../models/Island");
 const Progress = require("../models/Progress");
+const Mission = require("../models/Mission");
 const User = require("../models/User");
 const { unlockEligible } = require("./achievementService");
 const { bank, byId, playable } = require("../data/puzzles");
@@ -62,7 +63,7 @@ function view(row) {
 function catalogueFor(sessions, upcoming, islands) {
   const assigned = new Map(sessions.map(row => [row.puzzleId, row]));
   const islandNames = new Map(islands.map(island => [island.slug, island.name]));
-  return bank.map(({ id, title, island, difficulty, mechanic, story }) => {
+  return bank.map(({ id, title, island, difficulty, mechanic, story, tags }) => {
     const row = assigned.get(id);
     const islandName = islandNames.get(island) ?? (island === "stack-queue-depths"
       ? "Stack & Queue Depths"
@@ -71,12 +72,13 @@ function catalogueFor(sessions, upcoming, islands) {
       : upcoming.has(id) ? "upcoming" : "locked";
     return {
       puzzleId: id, title, islandId: island, islandName, difficulty, mechanic, synopsis: story, status,
+      ...(tags ? { tags } : {}),
       ...(row ? { sessionId: String(row._id), sessionStatus: row.status } : {}),
     };
   });
 }
 
-function createPuzzleService({ connection = mongoose.connection, Sessions = PuzzleSession, Users = User, Records = Progress,
+function createPuzzleService({ connection = mongoose.connection, Sessions = PuzzleSession, Users = User, Records = Progress, Missions = Mission,
   Islands = Island, unlock = unlockEligible, random = Math.random } = {}) {
   async function count(user, session) {
     return Records.countDocuments(finishedMissionFilter(user)).session(session ?? null);
@@ -87,6 +89,7 @@ function createPuzzleService({ connection = mongoose.connection, Sessions = Puzz
       try {
         return await connection.transaction(async session => {
           const completed = await count(user, session);
+          const missionsTotal = await Missions.countDocuments().session(session);
           const history = await Sessions.find({ user }).sort({ milestone: 1 }).session(session).lean();
           const additions = assignments(user, completed, history, random);
           const inserted = additions.length ? await Sessions.insertMany(additions, { session }) : [];
@@ -95,12 +98,14 @@ function createPuzzleService({ connection = mongoose.connection, Sessions = Puzz
           const current = rows.find(row => row.status === "active") || rows.find(row => row.status === "available");
           const entries = rows.map(summary);
           const missionsToNext = MISSIONS_PER_PUZZLE - completed % MISSIONS_PER_PUZZLE;
+          const nextReachable = completed + missionsToNext <= missionsTotal;
           const candidates = puzzleCandidates(sessions);
-          const upcoming = new Set(missionsToNext === 1 ? candidates.map(puzzle => puzzle.id) : []);
+          const upcoming = new Set(nextReachable && missionsToNext === 1 ? candidates.map(puzzle => puzzle.id) : []);
           const islands = await Islands.find({ slug: { $in: [...new Set(bank.map(puzzle => puzzle.island))] } })
             .select("slug name").session(session).lean();
           return { current: current ? summary(current) : null, history: entries.reverse(), missionsCompleted: completed,
-            missionsToNext, exhausted: candidates.length === 0, catalogue: catalogueFor(rows, upcoming, islands) };
+            missionsTotal, missionsToNext, nextReachable, exhausted: candidates.length === 0,
+            catalogue: catalogueFor(rows, upcoming, islands) };
         });
       } catch (err) {
         if (err.code !== 11000 || attempt >= 4) throw err;

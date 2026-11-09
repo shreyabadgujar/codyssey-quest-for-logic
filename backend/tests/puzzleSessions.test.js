@@ -3,11 +3,14 @@ const assert = require("node:assert/strict");
 const { once } = require("node:events");
 const { createPuzzleService, finishedMissionFilter } = require("../services/puzzleService");
 const { createRewardService } = require("../services/rewardService");
-const { byId } = require("../data/puzzles");
+const { bank, byId } = require("../data/puzzles");
+const expansion = require("../data/puzzles/expansion");
+const arrayExpansion = require("../data/puzzles/arrayArchipelago");
+const { shortestRoute } = require("../services/puzzleValidationService");
 const { buildJournal } = require("../services/profileService");
 const { unlockEligible } = require("../services/achievementService");
 
-function fixture() {
+function fixture(missionsTotal = 87) {
   const db = { rows: [], records: [], coins: new Map(), unlocked: new Set() };
   const matches=(row,query)=>Object.entries(query).every(([key,value])=>row[key]===value);
   let tail=Promise.resolve();
@@ -21,6 +24,7 @@ function fixture() {
   }};
   const lean=fn=>({lean:async()=>structuredClone(fn()),session(){return this;},sort(){return this;}});
   const options={ connection,random:()=>0,
+    Missions:{countDocuments:()=>({session:async()=>missionsTotal})},
     Islands:{find:()=>({select:()=>lean(()=>[{slug:"graphbound-kingdom",name:"Graphbound Kingdom"}])})},
     Records:{countDocuments:query=>({session:async()=>new Set(db.records.filter(r=>matches(r,query)).map(r=>r.mission)).size})},
     Sessions:{
@@ -92,18 +96,18 @@ test("catalogue exposes all islands and only public previews before any assignme
   const { service, add, db } = fixture();
   const initial = await service.lobby("a");
   assert.equal(initial.missionsToNext, 2);
-  assert.equal(initial.catalogue.length, 30);
+  assert.equal(initial.catalogue.length, 60);
   const islandCounts = new Map();
   for (const row of initial.catalogue) {
     islandCounts.set(row.islandId, (islandCounts.get(row.islandId) ?? 0) + 1);
-    assert.deepEqual(Object.keys(row).sort(), [
+    assert.deepEqual(Object.keys(row).filter(key => key !== "tags").sort(), [
       "difficulty", "islandId", "islandName", "mechanic", "puzzleId", "status", "synopsis", "title",
     ]);
     assert.ok(row.synopsis.trim());
     assert.equal(row.status, "locked");
   }
   assert.equal(islandCounts.size, 10);
-  assert.ok([...islandCounts.values()].every(count => count === 3));
+  assert.ok([...islandCounts.values()].every(count => count === 6));
   assert.equal(initial.catalogue.find(row => row.islandId === "tree-of-secrets").islandName, "Tree of Secrets");
   assert.equal(initial.catalogue.find(row => row.islandId === "stack-queue-depths").islandName, "Stack & Queue Depths");
   add("a", "mission-one");
@@ -123,7 +127,7 @@ test("catalogue statuses track only the player's assignments, skip, and complete
   assert.equal(selected(initial).status, "available");
   assert.equal(selected(initial).sessionId, row.id);
   assert.equal(initial.missionsToNext, 2);
-  assert.equal(initial.catalogue.filter(entry => entry.status === "locked").length, 29);
+  assert.equal(initial.catalogue.filter(entry => entry.status === "locked").length, 59);
 
   row = await doAct(f.service, "a", row, "start");
   assert.equal(selected(await f.service.lobby("a")).sessionStatus, "active");
@@ -144,14 +148,89 @@ test("catalogue statuses track only the player's assignments, skip, and complete
   f.add("a", "mission-three");
   const approaching = await f.service.lobby("a");
   assert.equal(approaching.missionsToNext, 1);
-  assert.equal(approaching.catalogue.filter(entry => entry.status === "upcoming").length, 25);
-  assert.equal(approaching.catalogue.filter(entry => entry.status === "locked").length, 4);
+  assert.equal(approaching.catalogue.filter(entry => entry.status === "upcoming").length, 50);
+  assert.equal(approaching.catalogue.filter(entry => entry.status === "locked").length, 9);
   f.add("a", "mission-four");
   const refreshed = await createPuzzleService(f.options).lobby("a");
   assert.equal(refreshed.history.length, 2);
   assert.equal(refreshed.missionsToNext, 2);
   assert.equal(refreshed.catalogue.filter(entry => entry.status === "available").length, 1);
   assert.equal(selected(refreshed).sessionId, row.id);
+});
+
+test("legacy sessions survive and 87 missions earn only 43 of the 60 catalogue entries", async () => {
+  const f = fixture();
+  const original = bank.filter(puzzle => !puzzle.tags);
+  const existing = await f.options.Sessions.insertMany(original.map((puzzle, i) =>
+    ({ user: "a", milestone: 2*(i+1), puzzleId: puzzle.id })));
+  const completed = f.db.rows[0];
+  const credited = byId.get(completed.puzzleId).coins;
+  Object.assign(completed, { status: "completed", coinsAwarded: credited, completedAt: new Date("2026-01-01") });
+  f.db.rows[1].status = "skipped";
+  f.db.coins.set("a", credited);
+  const storedHistory = structuredClone(f.db.rows);
+  for (let i=1; i<=60; i++) f.add("a", "mission-"+i);
+  assert.equal((await f.service.lobby("a")).history.length, 30);
+  f.add("a", "mission-61");
+  assert.equal((await f.service.lobby("a")).history.length, 30);
+  f.add("a", "mission-62");
+  const at62 = await f.service.lobby("a");
+  assert.equal(at62.history.length, 31);
+  assert.ok(expansion.some(puzzle => puzzle.id === at62.history[0].puzzleId));
+  for (let i=63; i<=87; i++) f.add("a", "mission-"+i);
+  const final = await f.service.lobby("a");
+  assert.equal(final.history.length, 43);
+  assert.equal(final.missionsTotal, 87);
+  assert.equal(final.nextReachable, false);
+  assert.equal(final.exhausted, false);
+  assert.equal(final.catalogue.filter(row => row.status === "locked").length, 17);
+  for (const row of existing) assert.equal(final.history.find(session => session.puzzleId === row.puzzleId).id, row._id);
+  assert.deepEqual(f.db.rows.slice(0, existing.length), storedHistory);
+  assert.equal(f.db.coins.get("a"), credited);
+  assert.deepEqual(await f.service.lobby("a"), final);
+});
+
+test("all 30 expansion puzzles accept their playable interactions, release hints and explanations, and award coins once", async () => {
+  const f = fixture(120);
+  for (let i=1; i<=120; i++) f.add("a", "mission-"+i);
+  const lobby = await f.service.lobby("a");
+  assert.equal(lobby.history.length,60);
+  assert.equal(lobby.exhausted,true);
+  let balance = 0;
+  for (const puzzle of [...expansion, ...arrayExpansion]) {
+    const id = lobby.history.find(row => row.puzzleId === puzzle.id).id;
+    let row = await f.service.open("a", id);
+    assert.deepEqual(row.puzzle.tags,puzzle.tags);
+    assert.equal(row.puzzle.solution,undefined);
+    row = await doAct(f.service,"a",row,"start");
+    const incomplete = await doAct(f.service,"a",row,"submit");
+    assert.equal(incomplete.verdict,"incomplete",puzzle.id);
+    row = incomplete;
+    for (let i=1; i<=3; i++) {
+      row = await doAct(f.service,"a",row,"hint");
+      assert.deepEqual(row.hints,puzzle.hints.slice(0,i));
+      assert.equal(row.explanation,undefined);
+    }
+    const solution = puzzle.solution;
+    const draft = {
+      detective: () => solution,
+      arrangement: () => ({steps:solution.witness.map(([id,turn])=>({id,turn}))}),
+      maze: () => ({moves:shortestRoute(puzzle.data).moves}),
+      workshop: () => ({operations:solution.witness}),
+      cipher: () => ({wheel:puzzle.data.alignment, mapping:Object.fromEntries(puzzle.data.symbols.map(symbol=>[symbol,solution.key[symbol]])), message:solution.answer}),
+      code: () => solution,
+    }[puzzle.mechanic]();
+    row = await doAct(f.service,"a",row,"draft",draft);
+    const won = await doAct(f.service,"a",row,"submit");
+    assert.equal(won.status,"completed",puzzle.id);
+    assert.equal(won.awarded,puzzle.coins);
+    assert.equal(won.explanation,puzzle.explanation);
+    assert.equal((await f.service.open("a",id)).explanation,puzzle.explanation);
+    assert.equal((await doAct(f.service,"a",won,"submit")).alreadyRewarded,true);
+    balance += puzzle.coins;
+    assert.equal(f.db.coins.get("a"),balance);
+  }
+  assert.equal(f.db.unlocked.size,1);
 });
 
 test("pending drafts and progressive hints survive new service instances; skip and revisit preserve work",async()=>{

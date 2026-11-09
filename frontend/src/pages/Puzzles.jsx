@@ -102,7 +102,9 @@ function PuzzleLobby() {
         <QuestSeal elaborate/>
         <div>
           <p><strong>{data.missionsCompleted}</strong> successful coding {data.missionsCompleted === 1 ? "mission" : "missions"} · <strong>{data.history.length}</strong> of {catalogue.length} quests assigned</p>
-          <p>{data.exhausted ? "All quests have been assigned." : <><strong>{until} {until === 1 ? "mission" : "missions"} to the next assignment.</strong>{" "}
+          <p>{data.exhausted ? "All quests have been assigned." : data.nextReachable === false
+            ? "The next assignment needs more coding missions than are currently published."
+            : <><strong>{until} {until === 1 ? "mission" : "missions"} to the next assignment.</strong>{" "}
             {until === 1 ? "One quest will be drawn from the remaining catalogue." : "A quest is drawn after every two successful coding missions."}</>}</p>
         </div>
         <Link to="/map" className="pz-link"><Map size={16}/> World map</Link>
@@ -160,6 +162,7 @@ function PuzzleLobby() {
             <li><span aria-hidden="true">✦</span>{modes[selected.mechanic][0]} · {selected.difficulty}</li>
             {session && <li><span aria-hidden="true">◇</span>Coding mission milestone {session.milestone}</li>}
           </ul>
+          {selected.tags?.length > 0 && <p className="pz-note">{selected.tags.join(" · ")}</p>}
           {selected.status === "upcoming" && <p>One successful coding mission remains before the next draw. This quest is a candidate.</p>}
           {selected.status === "locked" && <p>This trial opens when it is assigned to your journal.</p>}
           {selected.sessionStatus === "skipped" && <p className="pz-note">Set aside. Your notes are ready when you return.</p>}
@@ -212,6 +215,7 @@ function PuzzleRoom({ id }) {
         <p>{puzzle.story}</p>
         <SectionTitle>Objective</SectionTitle><p>{puzzle.objective}</p>
         <SectionTitle>Instructions</SectionTitle><p>{puzzle.instructions}</p>
+        {puzzle.tags?.length > 0 && <p className="pz-note">{puzzle.tags.join(" · ")}</p>}
         <SectionTitle>Hints</SectionTitle>
         {row.hints.length ? <ol className="pz-hints">{row.hints.map(hint => <li key={hint}>{hint}</li>)}</ol> : <p className="pz-note">No hints revealed.</p>}
         <p className="pz-note">Quest status: {labels[row.status]}</p>

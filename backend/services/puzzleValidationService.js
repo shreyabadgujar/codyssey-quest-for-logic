@@ -61,6 +61,12 @@ function workshopStep(type, state, op) {
   };
   if ((type === "stack" && action === "push") || (type === "queue" && action === "enqueue")) next.push(value);
   else if (type === "stack" && action === "pop" && next.length) notes.push(next.pop());
+  else if (type === "stack" && action === "peek" && next.length) notes.push(next.at(-1));
+  else if (type === "stack" && action === "duplicate" && next.length) next.push(next.at(-1));
+  else if (type === "stack" && action === "swap" && next.length >= 2) {
+    const last = next.length - 1;
+    [next[last], next[last - 1]] = [next[last - 1], next[last]];
+  }
   else if (type === "queue" && action === "dequeue" && next.length) notes.push(next.shift());
   else if (["array", "list"].includes(type) && action === "insert" && index >= 0 && index <= next.length) next.splice(index, 0, value);
   else if (["array", "list"].includes(type) && action === "delete" && index >= 0 && index < next.length) notes.push(next.splice(index, 1)[0]);
@@ -107,6 +113,31 @@ function cipherMessage(data, key, wheel) {
   if (data.mode === "columns") return [...rows[0]].map((_, i) => rows.map(row => row[i]).join("")).join("");
   if (data.mode === "rail") return [...rows[0]].map((letter, i) => letter + (rows[1][i] || "")).join("");
   if (data.mode === "rotate") for (let i = 0; i < wheel; i++) rows.push(rows.shift());
+  if (data.mode === "stride-cycles") {
+    const cells = rows.join("");
+    const seen = new Set();
+    let message = "";
+    for (let start = 0; start < cells.length; start++) {
+      for (let i = start; !seen.has(i); i = (i + data.stride) % cells.length) {
+        message += cells[i];
+        seen.add(i);
+      }
+    }
+    return message;
+  }
+  if (data.mode === "diagonal") {
+    return rows.flatMap((row, r) => [...row].map((letter, c) => ({ letter, r, c })))
+      .sort((a, b) => a.r + a.c - b.r - b.c || a.r - b.r).map(cell => cell.letter).join("");
+  }
+  if (data.mode === "outside-in" || data.mode === "mirror-columns") {
+    const width = rows[0].length;
+    return Array.from({ length: width }, (_, i) => {
+      const column = data.mode === "outside-in" ? (i % 2 ? width - 1 - Math.floor(i / 2) : i / 2) : width - 1 - i;
+      const letters = rows.map(row => row[column]);
+      if (data.mode === "mirror-columns" && i % 2 === 0) letters.reverse();
+      return letters.join("");
+    }).join("");
+  }
   return rows.join("");
 }
 
