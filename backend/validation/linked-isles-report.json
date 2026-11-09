@@ -1,0 +1,65 @@
+{
+  "island": "linked-isles",
+  "missions": [
+    {
+      "level": 1,
+      "id": "6af03ce7e741366be7eaf169",
+      "title": "The Headkeeper's Route",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 5
+    },
+    {
+      "level": 2,
+      "id": "6af03ce7e741366be7eaf16a",
+      "title": "The Spliced Mooring Line",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 5
+    },
+    {
+      "level": 3,
+      "id": "6af03ce7e741366be7eaf16b",
+      "title": "The Reversed Rope Crossing",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 6
+    },
+    {
+      "level": 4,
+      "id": "6af03ce7e741366be7eaf16c",
+      "title": "The Midspan Rendezvous",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 6
+    },
+    {
+      "level": 5,
+      "id": "6af03ce7e741366be7eaf16d",
+      "title": "The Endless Mooring Circuit",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 6
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "island": "sorting-sands",
+  "missions": [
+    {
+      "level": 1,
+      "id": "6af03fd4e741366be7eaf1b4",
+      "title": "The Scattered Survey Stakes",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 5
+    },
+    {
+      "level": 2,
+      "id": "6af03fd4e741366be7eaf1b5",
+      "title": "The Customs Priority Roll",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 5
+    },
+    {
+      "level": 3,
+      "id": "6af03fd4e741366be7eaf1b6",
+      "title": "The Unified Dune Claims",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 5
+    },
+    {
+      "level": 4,
+      "id": "6af03fd5e741366be7eaf1b7",
+      "title": "The Balanced Camel Loads",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 5
+    },
+    {
+      "level": 5,
+      "id": "6af03fd5e741366be7eaf1b8",
+      "title": "The Closing Bazaar",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 6
+    }
+  ]
+}

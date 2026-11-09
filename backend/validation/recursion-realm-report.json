@@ -1,0 +1,65 @@
+{
+  "island": "recursion-realm",
+  "missions": [
+    {
+      "level": 1,
+      "id": "6af04203e741366be7eaf1f4",
+      "title": "The Shared Gear Teeth",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 6
+    },
+    {
+      "level": 2,
+      "id": "6af04203e741366be7eaf1f5",
+      "title": "The Nested Echo Number",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 6
+    },
+    {
+      "level": 3,
+      "id": "6af04203e741366be7eaf1f6",
+      "title": "The Exact Offering Subsets",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 6
+    },
+    {
+      "level": 4,
+      "id": "6af04203e741366be7eaf1f7",
+      "title": "The Rearrangement Vault",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 5
+    },
+    {
+      "level": 5,
+      "id": "6af04203e741366be7eaf1f8",
+      "title": "The Watchers of the Mirror Floor",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 6
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "island": "stack-queue-depths",
+  "missions": [
+    {
+      "level": 1,
+      "id": "6af03ea7e741366be7eaf19e",
+      "title": "The Last Docket",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 5
+    },
+    {
+      "level": 2,
+      "id": "6af03ea7e741366be7eaf19f",
+      "title": "The First Broken Seal",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 6
+    },
+    {
+      "level": 3,
+      "id": "6af03ea7e741366be7eaf1a0",
+      "title": "The Higher Watchtower",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 5
+    },
+    {
+      "level": 4,
+      "id": "6af03ea7e741366be7eaf1a1",
+      "title": "The Two-Shaft Dispatch",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 6
+    },
+    {
+      "level": 5,
+      "id": "6af03ea8e741366be7eaf1a2",
+      "title": "The Steady Ballast Passage",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 5
+    }
+  ]
+}

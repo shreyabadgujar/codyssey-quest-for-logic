@@ -1,0 +1,106 @@
+const { makeBank } = require("./missionBank");
+const letters = "abcdefghijklmnopqrstuvwxyz";
+const read = (input) => input.trim().split(/\s+/);
+const lineStarter = ["    string text; cin >> text;\n    // Compute and print your answer.", "        String text = in.next();\n        // Compute and print your answer.", "text = sys.stdin.readline().strip()\n# Compute and print your answer."];
+const pairStarter = ["    string text, pattern; cin >> text >> pattern;\n    // Compute and print your answer.", "        String text = in.next(), pattern = in.next();\n        // Compute and print your answer.", "text, pattern = sys.stdin.read().split()\n# Compute and print your answer."];
+const island = {
+  slug: "stringwood-forest", name: "Stringwood Forest", topic: "Strings", order: 2,
+  description: "Read the recovered glyphs to investigate a forged canopy dispatch.",
+  image: "/assets/islands/stringwood-forest.webp", mapPosition: { x: 47, y: 20 },
+  completionReward: { xp: 400, coins: 200, artifact: "The Cipher-Quill of Ætheria" },
+};
+module.exports = makeBank(island, [
+  {
+    title: "The Ledger of Fallen Glyphs", intro: "A courier dropped a dispatch in the undergrowth. A ledger of the surviving letters will show whether a glyph was removed.",
+    statement: "Count each lowercase letter in the recovered token. Report all 26 counts in alphabetical order, including zeros for letters that do not appear.",
+    input: "One line containing the lowercase string s.", output: "One line with 26 space-separated integers. The first counts a and the last counts z.",
+    constraints: "1 ≤ |s| ≤ 100000. Every character is an ASCII lowercase letter.",
+    samples: [
+      ["abaca\n", "3 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0", "There are three a glyphs, one b and one c."],
+      ["z\n", "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1", "Only the final counter is nonzero."],
+    ],
+    hints: ["Each glyph affects exactly one counter.", "Use one array entry per letter.", "Subtract the code point of a to obtain an index from 0 through 25."],
+    editorial: "Initialize 26 counters to zero. For each character, map it to its alphabetical index and increment the corresponding counter. After each character the counters describe exactly the processed prefix, since only that character's entry changes. Print the entire array so absent letters stay in their required positions. A one-letter token and a token containing only repeats use the same logic.",
+    time: "O(n + 26)", space: "O(26) auxiliary", starter: lineStarter,
+    reference: [
+      '    string s; cin >> s; int counts[26]{};\n    for (char ch : s) ++counts[ch - \'a\'];\n    for (int i = 0; i < 26; ++i) cout << (i ? " " : "") << counts[i];',
+      '        int[] counts = new int[26];\n        for (char ch : in.next().toCharArray()) counts[ch - \'a\']++;\n        for (int i = 0; i < 26; i++) System.out.print((i == 0 ? "" : " ") + counts[i]);',
+      'counts = [0] * 26\nfor ch in sys.stdin.readline().strip():\n    counts[ord(ch) - ord("a")] += 1\nprint(*counts)',
+    ],
+    oracle: input => [...letters].map(ch => read(input)[0].split(ch).length - 1).join(" "),
+    hidden: ["m\n","zzzzaabz\n", ["z".repeat(100000) + "\n", Array(25).fill(0).concat(100000).join(" ")]],
+    clue: "Count the notches on the south waypost and lift the lettered tile.", treasure: "Lettered Cedar Tile",
+  },
+  {
+    title: "The Mirrorbark Signature", intro: "The suspect's initials were carved beside a stream. The ward recognizes a signature only when its letters and digits read the same in reflection.",
+    statement: "Ignore punctuation and compare ASCII letters without regard to case. Decide whether the remaining sequence of letters and digits is a palindrome. A sequence with zero or one retained character is a palindrome.",
+    input: "One nonempty token s. It has no spaces.", output: "Print YES for a palindrome, otherwise NO.",
+    constraints: "1 ≤ |s| ≤ 100000. Allowed characters are ASCII letters, digits, periods, underscores, and hyphens.",
+    samples: [["A-b_1.Ba\n", "YES", "Filtering and folding gives ab1ba."], ["a-12-a\n", "NO", "The middle two digits differ in a12a."]],
+    hints: ["The raw punctuation does not affect the decision.", "Compare the meaningful characters from opposite ends.", "Advance past ignored characters before each comparison and compare folded ASCII letters."],
+    editorial: "Use two pointers at the ends. Skip any non-alphanumeric characters on either side, then compare the remaining characters case-insensitively. A mismatch proves that the filtered sequence is not a palindrome. When they match, moving inward removes a symmetric pair and leaves exactly the same decision for the interior. If the pointers meet or cross, every pair matched, including the case where no alphanumeric character exists.",
+    time: "O(n)", space: "O(1) auxiliary with two pointers", starter: lineStarter,
+    reference: [
+      '    string s; cin >> s; int l=0, r=(int)s.size()-1;\n    while (l<r) {\n        if (!isalnum(s[l])) { ++l; continue; }\n        if (!isalnum(s[r])) { --r; continue; }\n        if (tolower(s[l++]) != tolower(s[r--])) { cout << "NO"; return 0; }\n    }\n    cout << "YES";',
+      '        String s=in.next(); int l=0, r=s.length()-1;\n        while (l<r) {\n            if (!Character.isLetterOrDigit(s.charAt(l))) { l++; continue; }\n            if (!Character.isLetterOrDigit(s.charAt(r))) { r--; continue; }\n            if (Character.toLowerCase(s.charAt(l++)) != Character.toLowerCase(s.charAt(r--))) { System.out.print("NO"); return; }\n        }\n        System.out.print("YES");',
+      's = sys.stdin.readline().strip()\nl, r = 0, len(s)-1\nwhile l < r:\n    if not s[l].isalnum():\n        l += 1\n    elif not s[r].isalnum():\n        r -= 1\n    elif s[l].lower() != s[r].lower():\n        print("NO")\n        break\n    else:\n        l, r = l+1, r-1\nelse:\n    print("YES")',
+    ],
+    oracle: input => { const s = input.replace(/[^a-z0-9]/gi, "").toLowerCase(); return s === [...s].reverse().join("") ? "YES" : "NO"; },
+    hidden: ["_\n","-a.2_B_a-\n","Ab--bA\n", ["Aa-".repeat(33333) + "a\n", "YES"]],
+    clue: "Search the upstream face of the split mirrorbark for a pewter reflection token.", treasure: "Pewter Reflection Token",
+  },
+  {
+    title: "The Rearranged Dispatch", intro: "An informant hides a seal inside the dispatch by scrambling its letters. Record every possible starting point where the seal could be concealed.",
+    statement: "Find all contiguous substrings of text s whose letters can be rearranged into pattern p. Print every matching 1-based start in increasing order. Overlapping matches are valid.",
+    input: "Two lines, containing s and p respectively.", output: "First line: number of matches. Second line: their 1-based start positions, separated by spaces. The second line may be empty.",
+    constraints: "1 ≤ |s| ≤ 30000 and 1 ≤ |p| ≤ 30000. Both contain only lowercase ASCII letters. p may be longer than s.",
+    samples: [["ababa\nab\n","4\n1 2 3 4","All four length-two substrings are ab or ba."],["abbca\nabc\n","1\n3","Only bca has all three letters."]],
+    hints: ["A match must have the same length as the seal.", "A frequency array identifies all rearrangements of a token.", "Slide one position at a time and update the departing and entering counters before comparing."],
+    editorial: "Count p's letters and maintain the same 26 counters for a window of size |p|. Initialize by adding the first |p| letters. Equal frequency arrays are necessary and sufficient for an anagram because each letter can be paired with an identical letter in p. Move the window by subtracting the departing letter and adding the entering letter. Check all starts, even overlapping ones. Return zero immediately when the pattern is longer than the text. Accumulate starts so their count can be printed first.",
+    time: "O(|p| + 26|s|)", space: "O(26 + matches)", starter: pairStarter,
+    reference: [
+      '    string s,p; cin>>s>>p; array<int,26> want{}, got{}; vector<int> hits;\n    for (char ch:p) ++want[ch-\'a\'];\n    int m=p.size();\n    for (int i=0;i<(int)s.size();++i) {\n        ++got[s[i]-\'a\']; if(i>=m) --got[s[i-m]-\'a\'];\n        if(i+1>=m && want==got) hits.push_back(i-m+2);\n    }\n    cout<<hits.size()<<"\\n"; for(int pos:hits) cout<<pos<<" ";',
+      '        String s=in.next(), p=in.next(); int[] want=new int[26], got=new int[26];\n        for(char ch:p.toCharArray()) want[ch-\'a\']++;\n        int m=p.length(), count=0; StringBuilder hits=new StringBuilder();\n        for(int i=0;i<s.length();i++) {\n            got[s.charAt(i)-\'a\']++; if(i>=m) got[s.charAt(i-m)-\'a\']--;\n            if(i+1>=m && Arrays.equals(want,got)) { count++; hits.append(i-m+2).append(" "); }\n        }\n        System.out.print(count+"\\n"+hits);',
+      's, p = sys.stdin.read().split()\nwant, got = [0]*26, [0]*26\nfor ch in p:\n    want[ord(ch)-97] += 1\nhits = []\nm = len(p)\nfor i, ch in enumerate(s):\n    got[ord(ch)-97] += 1\n    if i >= m:\n        got[ord(s[i-m])-97] -= 1\n    if i+1 >= m and want == got:\n        hits.append(i-m+2)\nprint(len(hits))\nprint(*hits)',
+    ],
+    oracle: input => { const [s,p] = read(input), sorted = [...p].sort().join(""); const hits = []; for (let i=0; i+p.length<=s.length; i++) if ([...s.slice(i,i+p.length)].sort().join("")===sorted) hits.push(i+1); return hits.length+"\n"+hits.join(" "); },
+    hidden: ["a\na\n","ab\naba\n","baaacaa\naaa\n",["a".repeat(30000)+"\n"+"a".repeat(15000)+"\n","15001\n"+Array.from({length:15001},(_,i)=>i+1).join(" ")]],
+    clue: "The rearranged seal matches the brass clasp on the courier's satchel.", treasure: "Brass Dispatch Clasp",
+  },
+  {
+    title: "The Unrepeated Trail", intro: "A trail marker is useful only if it can be distinguished from every other marker in the same stretch. Find the earliest longest stretch that can be followed without ambiguity.",
+    statement: "Find a longest contiguous substring of s with all letters distinct. If several have the maximum length, choose the earliest start.",
+    input: "One line containing s.", output: "Two integers: the maximum length and the selected 1-based starting position.",
+    constraints: "1 ≤ |s| ≤ 100000. s consists of lowercase ASCII letters.",
+    samples: [["abba\n","2 1","ab and ba both have length two, so ab wins."],["aaabcdeff\n","6 3","abcdef starts at position 3."]],
+    hints: ["A repeat makes only some earlier starting positions invalid.", "Remember the last position of each letter.", "Move left to max(left, last[letter]+1); update the answer only on a strictly longer window."],
+    editorial: "Scan the right endpoint, keeping last seen indices in a table. If the current character was already inside the window, move the left endpoint immediately past its previous occurrence. No earlier start can work, because it would retain the repeat. Starts at or after this boundary are valid, so the current window is the longest ending at right. Update the best on a strictly greater length only. Equal lengths encountered later cannot start earlier. The max operation prevents left from moving backward when the previous occurrence was outside the window.",
+    time: "O(n)", space: "O(26) auxiliary", starter: lineStarter,
+    reference: [
+      '    string s;cin>>s;vector<int> last(26,-1);int left=0,best=0,start=0;\n    for(int r=0;r<(int)s.size();r++) { int x=s[r]-\'a\'; left=max(left,last[x]+1); last[x]=r; if(r-left+1>best){best=r-left+1;start=left;} }\n    cout<<best<<" "<<start+1;',
+      '        String s=in.next();int[] last=new int[26];Arrays.fill(last,-1);int left=0,best=0,start=0;\n        for(int r=0;r<s.length();r++){int x=s.charAt(r)-\'a\';left=Math.max(left,last[x]+1);last[x]=r;if(r-left+1>best){best=r-left+1;start=left;}}\n        System.out.print(best+" "+(start+1));',
+      's=sys.stdin.readline().strip()\nlast=[-1]*26\nleft=best=start=0\nfor r,ch in enumerate(s):\n    x=ord(ch)-97\n    left=max(left,last[x]+1)\n    last[x]=r\n    if r-left+1>best:\n        best,start=r-left+1,left\nprint(best,start+1)',
+    ],
+    oracle: input => { const s=read(input)[0]; let best=0,start=0; for(let i=0;i<s.length;i++){const seen=new Set(); for(let j=i;j<s.length&&!seen.has(s[j]);j++){seen.add(s[j]); if(seen.size>best){best=seen.size;start=i+1;}}} return best+" "+start; },
+    hidden: ["z\n","aaaaaa\n","dvdf\n",[letters.repeat(3846)+"abcd\n","26 1"]],
+    clue: "At the last distinct trail mark, look beneath the carved fern for a green lens.", treasure: "Fern-Glass Lens",
+  },
+  {
+    title: "The Third Echo", intro: "The cipher repeats a phrase at the start and end of a dispatch. To distinguish a genuine signature from a planted border, the same phrase must also appear wholly inside it.",
+    statement: "Find the longest nonempty string that is a prefix and suffix of s and also occurs at a start greater than 1 and an end less than |s|. Indexing here is 1-based and endpoints are inclusive. Occurrences may overlap.",
+    input: "One line containing s.", output: "The longest qualifying phrase, or -1 if there is none.",
+    constraints: "1 ≤ |s| ≤ 100000. s contains only lowercase ASCII letters.",
+    samples: [["aaaaa\n","aaa","aaa occurs at positions 1–3, 2–4 and 3–5. The length-four border has no internal occurrence."],["abcab\n","-1","ab is a border but occurs only at the two ends."]],
+    hints: ["A border is both a proper prefix and a suffix.", "The prefix function identifies borders and prefix matches ending inside the dispatch.", "Find the largest prefix-function value before the last position. Follow border links from the final value until the length fits."],
+    editorial: "Compute pi[i], the length of the longest proper prefix ending at i. Start each new position with the preceding match length. Follow pi links when the next letter fails to extend it, because every shorter candidate is a border of the current match. The maximum pi[i] over i before the last position is the longest prefix that occurs with a nonzero start and before the final letter. Every shorter prefix occurs at that same start. Enumerate suffix borders from pi[n-1] by following pi[length-1] and take the first length at most that maximum. This gives the largest valid border, even when occurrences overlap. The prefix scan is linear because advances increase the match by at most one and each fallback decreases it. A one-character string has no border.",
+    time: "O(n)", space: "O(n)", starter: lineStarter,
+    reference: [
+      '    string s;cin>>s;int n=s.size(),inside=0;vector<int> pi(n);\n    for(int i=1;i<n;i++){int j=pi[i-1];while(j&&s[i]!=s[j])j=pi[j-1];if(s[i]==s[j])j++;pi[i]=j;if(i<n-1)inside=max(inside,j);}\n    int k=pi[n-1];while(k>inside)k=pi[k-1];cout<<(k?s.substr(0,k):"-1");',
+      '        String s=in.next();int n=s.length(),inside=0;int[] pi=new int[n];\n        for(int i=1;i<n;i++){int j=pi[i-1];while(j>0&&s.charAt(i)!=s.charAt(j))j=pi[j-1];if(s.charAt(i)==s.charAt(j))j++;pi[i]=j;if(i<n-1)inside=Math.max(inside,j);}\n        int k=pi[n-1];while(k>inside)k=pi[k-1];System.out.print(k>0?s.substring(0,k):"-1");',
+      's=sys.stdin.readline().strip()\nn=len(s)\npi=[0]*n\ninside=0\nfor i in range(1,n):\n    j=pi[i-1]\n    while j and s[i]!=s[j]:\n        j=pi[j-1]\n    if s[i]==s[j]:\n        j+=1\n    pi[i]=j\n    if i<n-1:\n        inside=max(inside,j)\nk=pi[-1]\nwhile k>inside:\n    k=pi[k-1]\nprint(s[:k] if k else "-1")',
+    ],
+    oracle: input => { const s=read(input)[0]; for(let k=s.length-2;k>0;k--){const prefix=s.slice(0,k);if(s.endsWith(prefix)&&s.slice(1,-1).includes(prefix))return prefix;}return "-1"; },
+    hidden: ["a\n","abcabcabc\n","abacaba\n",["a".repeat(100000)+"\n","a".repeat(99998)]],
+    clue: "The third echo comes from inside the root arch, where the cipher quill lies wrapped in bark.", treasure: "Bark-Wrapped Cipher Quill",
+  },
+]);

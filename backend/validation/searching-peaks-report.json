@@ -1,0 +1,65 @@
+{
+  "island": "searching-peaks",
+  "missions": [
+    {
+      "level": 1,
+      "id": "6af040ebe741366be7eaf1d8",
+      "title": "The First Distress Flare",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 5
+    },
+    {
+      "level": 2,
+      "id": "6af040ebe741366be7eaf1d9",
+      "title": "The Minimum Safe Altitude",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 5
+    },
+    {
+      "level": 3,
+      "id": "6af040ebe741366be7eaf1da",
+      "title": "The Span of Buried Markers",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 5
+    },
+    {
+      "level": 4,
+      "id": "6af040ebe741366be7eaf1db",
+      "title": "The Rotated Ridge Chart",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 5
+    },
+    {
+      "level": 5,
+      "id": "6af040ebe741366be7eaf1dc",
+      "title": "The Pass Before the Avalanche",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 6
+    }
+  ]
+}

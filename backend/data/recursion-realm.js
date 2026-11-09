@@ -1,0 +1,103 @@
+const { makeBank } = require("./missionBank");
+const numbers = s => s.trim().split(/\s+/).map(Number);
+const starter = (cpp,java,py) => ["    "+cpp+"\n    // Compute and print your answer.", "        "+java+"\n        // Compute and print your answer.",py+"\n# Compute and print your answer."];
+const refs = (head,...bodies)=>head.map((code,i)=>code.split(/\n[ ]*(?:\/\/|#) /)[0]+"\n"+bodies[i]);
+const pair=starter("long long a,b;cin>>a>>b;","long a=in.nextLong(),b=in.nextLong();","a,b=map(int,sys.stdin.buffer.read().split())");
+const array=starter("int n;cin>>n;vector<long long>a(n);for(auto &x:a)cin>>x;","int n=in.nextInt();long[] a=new long[n];for(int i=0;i<n;i++)a[i]=in.nextLong();","n,*a=map(int,sys.stdin.buffer.read().split())");
+const subset=starter("int n;long long target;cin>>n>>target;vector<long long>a(n);for(auto &x:a)cin>>x;","int n=in.nextInt();long target=in.nextLong();long[] a=new long[n];for(int i=0;i<n;i++)a[i]=in.nextLong();","n,target,*a=map(int,sys.stdin.buffer.read().split())");
+const token=starter("string s;cin>>s;","String s=in.next();","s=sys.stdin.readline().strip()");
+const board=starter("int n;cin>>n;vector<string> board(n);for(auto &row:board)cin>>row;","int n=in.nextInt();String[] board=new String[n];for(int i=0;i<n;i++)board[i]=in.next();","tokens=sys.stdin.read().split()\nn=int(tokens[0])\nboard=tokens[1:]");
+const choose=(items)=>items.length===0?[""]:items.flatMap((x,i)=>choose(items.slice(0,i).concat(items.slice(i+1))).map(rest=>x+rest));
+const permutations=(s)=>[...new Set(choose([...s.trim()]))].sort().join("\n");
+module.exports=makeBank({
+  slug:"recursion-realm",name:"Recursion Realm",topic:"Recursion",order:7,
+  description:"Unravel nested mechanisms and reconstruct the paths between mirrored chambers.",
+  image:"/assets/islands/recursion-realm.webp",mapPosition:{x:31,y:17},
+  completionReward:{coins:450,xp:900,artifact:"The Matryoshka Compass"},
+},[
+  {
+    title:"The Shared Gear Teeth",intro:"Two gears have lost their alignment marks. The machinist needs the greatest common spacing that fits both tooth counts.",
+    statement:"Compute the greatest common divisor of a and b. Define gcd(0,0)=0. For any other input, the answer is the largest positive integer dividing both counts.",
+    input:"One line containing a b.",output:"One integer, the greatest common divisor.",
+    constraints:"0 ≤ a,b ≤ 10^18.",
+    samples:[["84 30\n","6","6 divides both, and no larger shared divisor exists."],["0 19\n","19","Every positive integer divides zero, so the answer is the largest divisor of 19."]],
+    hints:["A shared divisor of a and b also divides their remainder.","Replace (a,b) with (b,a mod b).","When b is zero, return a and perform no remainder operation."],
+    editorial:"If b=0, return a, including the stipulated zero pair. Otherwise write a=q·b+r. Every common divisor of a and b divides r, and every common divisor of b and r divides q·b+r=a. The smaller problem therefore has the same answer. Recurse on (b,r), which terminates because 0≤r<b. Two steps reduce the larger operand by at least half, giving logarithmic depth. Use 64-bit integers in C++ or Java.",
+    time:"O(log(max(a,b)+2))",space:"O(log(max(a,b)+2)) recursion depth",starter:pair,
+    reference:refs(pair,
+      '    function<long long(long long,long long)> gcd=[&](long long x,long long y){return y?gcd(y,x%y):x;};\n    cout<<gcd(a,b);',
+      '        class Solver { long gcd(long x,long y){return y==0?x:gcd(y,x%y);} }\n        System.out.print(new Solver().gcd(a,b));',
+      'def gcd(x,y):\n    return gcd(y,x%y) if y else x\nprint(gcd(a,b))'),
+    oracle:s=>{let [a,b]=s.trim().split(/\s+/).map(BigInt);while(b)[a,b]=[b,a%b];return String(a);},
+    hidden:["0 0\n","18 18\n","679891637638612258 420196140727489673\n",["1000000000000000000 0\n","1000000000000000000"]],
+    clue:"At the shared mark on the brass gear sits a tiny calibration pin.",treasure:"Brass Calibration Pin",
+  },
+  {
+    title:"The Nested Echo Number",intro:"An echo chamber compares two smaller chambers. Follow its split rule to reconstruct the number heard at the entrance.",
+    statement:"A segment of one reading has that reading as its echo. A segment of length k≥2 splits into the first floor(k/2) readings and the remaining readings. Its echo is the absolute difference of its two child echoes. Find the echo of the entire array.",
+    input:"First line: n. Second line: n signed readings.",output:"One integer, the complete echo. It may be negative only when n=1.",
+    constraints:"1 ≤ n ≤ 16384. -10^9 ≤ reading ≤ 10^9.",
+    samples:[["4\n9 3 5 2\n","3","The child echoes are |9-3|=6 and |5-2|=3, giving 3."],["3\n-7 2 4\n","9","The left child has one reading, -7. The right child echoes 2, giving |-7-2|=9."]],
+    hints:["The splitting rule defines the smaller problem.","Use a recursive function on an index interval.","Return a[left] for one element. Otherwise solve the two half-open child intervals without copying."],
+    editorial:"Define solve(l,r) for a nonempty half-open interval. Return its only reading when r-l=1. Otherwise compute m=l+floor((r-l)/2) and return abs(solve(l,m)-solve(m,r)). Induction on interval length proves the result follows the chamber rule: both smaller results are correct, and their difference is exactly the parent's definition. There are n singleton leaves and n-1 internal calls. Balanced splits give logarithmic recursion depth. Do not take the absolute value at a leaf, and use signed 64-bit arithmetic.",
+    time:"O(n)",space:"O(log n) auxiliary, excluding input",starter:array,
+    reference:refs(array,
+      '    function<long long(int,int)> echo=[&](int l,int r){if(r-l==1)return a[l];int m=(l+r)/2;return llabs(echo(l,m)-echo(m,r));};\n    cout<<echo(0,n);',
+      '        class Solver { long echo(int l,int r){if(r-l==1)return a[l];int m=(l+r)/2;return Math.abs(echo(l,m)-echo(m,r));} }\n        System.out.print(new Solver().echo(0,n));',
+      'def echo(l,r):\n    if r-l==1:\n        return a[l]\n    m=(l+r)//2\n    return abs(echo(l,m)-echo(m,r))\nprint(echo(0,n))'),
+    oracle:s=>{const [n,...a]=numbers(s);const todo=[[0,n,false]],value=[];while(todo.length){const [l,r,done]=todo.pop();if(r-l===1)value.push(a[l]);else if(done)value.push(Math.abs(value.pop()-value.pop()));else{const m=Math.floor((l+r)/2);todo.push([l,r,true],[m,r,false],[l,m,false]);}}return String(value[0]);},
+    hidden:["1\n-8\n","2\n-1000000000 1000000000\n","5\n1 -4 3 2 -7\n",["16384\n"+Array(16384).fill(11).join(" ")+"\n","0"]],
+    clue:"Inside the smallest echo chamber, a carved shell repeats the answer.",treasure:"Carved Echo Shell",
+  },
+  {
+    title:"The Exact Offering Subsets",intro:"An altar accepts an exact weight. Count all the different collections of numbered offerings that can unlock it.",
+    statement:"Count subsets of the n indexed positive weights whose sum is exactly T. Two subsets differing by an index count separately even if their values are equal. The empty subset counts for T=0.",
+    input:"First line: n T. Second line: n positive weights.",output:"One integer, the number of valid subsets.",
+    constraints:"1 ≤ n ≤ 20. 1 ≤ weight ≤ 10^9. 0 ≤ T ≤ 2×10^10.",
+    samples:[["4 5\n2 3 3 5\n","3","Either 3 can accompany 2, and the singleton 5 is a third choice."],["3 0\n1 1 9\n","1","The empty selection alone totals zero."]],
+    hints:["At each index, an offering is included or excluded.","Track the remaining sum in a recursive call.","If remaining is zero, count one result. If negative or no weights remain, count zero."],
+    editorial:"From state (i, remaining), count the subsets using only positions i and later. Split them into those excluding index i and those including it. The second branch subtracts its weight; their counts add because the two sets are disjoint and exhaust all choices. At remaining zero, the empty continuation is the only valid continuation because all weights are positive. Negative remaining cannot recover. If no index remains and the target is still positive, return zero. Distinct branches count equal-valued indices separately. The n limit bounds the full binary recursion tree.",
+    time:"O(2^n)",space:"O(n)",starter:subset,
+    reference:refs(subset,
+      '    function<long long(int,long long)> count=[&](int i,long long left)->long long{if(left==0)return 1;if(i==n||left<0)return 0;return count(i+1,left)+count(i+1,left-a[i]);};\n    cout<<count(0,target);',
+      '        class Solver { long count(int i,long left){if(left==0)return 1;if(i==n||left<0)return 0;return count(i+1,left)+count(i+1,left-a[i]);} }\n        System.out.print(new Solver().count(0,target));',
+      'def count(i,left):\n    if left==0:\n        return 1\n    if i==n or left<0:\n        return 0\n    return count(i+1,left)+count(i+1,left-a[i])\nprint(count(0,target))'),
+    oracle:s=>{const [n,t,...a]=numbers(s);let ans=0;for(let mask=0;mask<(1<<n);mask++){let total=0;for(let i=0;i<n;i++)if(mask&(1<<i))total+=a[i];if(total===t)ans++;}return String(ans);},
+    hidden:["1 3\n4\n","6 14\n2 4 6 8 8 9\n","3 3000000000\n1000000000 1000000000 1000000000\n",["20 10\n"+Array(20).fill(1).join(" ")+"\n","184756"]],
+    clue:"Beneath the exact weight plate is a chalk-marked silver offering cup.",treasure:"Silver Offering Cup",
+  },
+  {
+    title:"The Rearrangement Vault",intro:"The locksmith knows the vault code uses each recovered glyph exactly once. List the possible codes in the order the dial expects.",
+    statement:"Print every distinct permutation of the lowercase letters of s in lexicographic order. Repeated characters are indistinguishable.",
+    input:"One line containing s.",output:"One permutation per line, in ascending lexicographic order. Do not print a count.",
+    constraints:"1 ≤ |s| ≤ 7. s contains only lowercase ASCII letters.",
+    samples:[["aba\n","aab\naba\nbaa","The two a glyphs are indistinguishable, producing three distinct codes."],["zz\n","zz","Both positions are fixed to z, so there is one code."]],
+    hints:["Build the code one character at a time.","Keep a remaining frequency for each glyph rather than a used flag per input position.","At each depth, try available glyphs from a to z. Restore the frequency when returning from a branch."],
+    editorial:"Count the available characters. For each next position, try every letter with positive count, decreasing its count while exploring that branch. At full length, output the prefix and backtrack. Each feasible code has a unique sequence of letter choices and each such sequence is emitted, so repeats do not create duplicate branches. Trying letters in increasing order ensures that all codes under an earlier prefix precede all codes under a later one. Restore counts after each recursive call so sibling prefixes see the same original inventory. With one distinct letter there is only one branch per depth.",
+    time:"O(26·n·P), where P is the number of distinct permutations",space:"O(n + 26) auxiliary, excluding output",starter:token,
+    reference:refs(token,
+      '    int left[26]{};for(char c:s)left[c-\'a\']++;string word;\n    function<void()> visit=[&](){if(word.size()==s.size()){cout<<word<<"\\n";return;}for(int i=0;i<26;i++)if(left[i]){left[i]--;word+=char(\'a\'+i);visit();word.pop_back();left[i]++;}};\n    visit();',
+      '        int[] left=new int[26];for(char c:s.toCharArray())left[c-\'a\']++;StringBuilder out=new StringBuilder();char[] word=new char[s.length()];\n        class Solver { void visit(int i){if(i==word.length){out.append(word).append("\\n");return;}for(int x=0;x<26;x++)if(left[x]>0){left[x]--;word[i]=(char)(\'a\'+x);visit(i+1);left[x]++;}} }\n        new Solver().visit(0);System.out.print(out);',
+      'from collections import Counter\nleft=Counter(s)\nkeys=sorted(left)\nword=[]\ndef visit():\n    if len(word)==len(s):\n        print("".join(word))\n        return\n    for ch in keys:\n        if left[ch]:\n            left[ch]-=1\n            word.append(ch)\n            visit()\n            word.pop()\n            left[ch]+=1\nvisit()'),
+    oracle:permutations,
+    hidden:["m\n","bbaa\n","abcdefg\n"],
+    clue:"The first dial code opens a compartment containing a brass permutation wheel.",treasure:"Brass Permutation Wheel",
+  },
+  {
+    title:"The Watchers of the Mirror Floor",intro:"The chamber floor holds one watcher per row. Mark them on unbroken tiles so no watcher sees another along a column or diagonal.",
+    statement:"Count placements of n queens on an n×n board with blocked squares. Place exactly one queen in every row on a dot. Queens cannot share a column or either diagonal. Blocked squares prevent placement but do not obstruct attacks.",
+    input:"First line: n. Then n lines of n characters each. A dot denotes open and # denotes blocked.",output:"One integer, the number of valid placements.",
+    constraints:"1 ≤ n ≤ 12.",
+    samples:[["4\n....\n....\n....\n....\n","2","The 1-based column sequences are [2,4,1,3] and [3,1,4,2]."],["4\n####\n....\n....\n....\n","0","Every placement needs a queen in the blocked first row."]],
+    hints:["Each recursion level can choose the column for one row.","Reject columns and diagonals already threatened by earlier rows.","Use bit masks for occupied columns and attacks at the current row. Shift the diagonal masks for the next row."],
+    editorial:"Encode each row's open squares as bits. Recurse row by row with masks for occupied columns and the two sets of diagonal attacks on this row. Intersect the open mask with the complement of all attacks. Each set bit is a legal column; choose it, add it to the occupied columns, then shift the two diagonal masks in opposite directions to represent their attacks one row down. Mask off columns outside the board. Every valid placement follows a unique sequence of these choices, and pruning removes only illegal prefixes. Reaching row n counts one placement. Blocked cells restrict choices independently of the attack masks, so they never shield a queen.",
+    time:"O(n! + n²) as an upper bound",space:"O(n) auxiliary, excluding the board",starter:board,
+    reference:refs(board,
+      '    int full=(1<<n)-1;vector<int> open(n);for(int r=0;r<n;r++)for(int c=0;c<n;c++)if(board[r][c]==\'.\')open[r]|=1<<c;\n    function<long long(int,int,int,int)> visit=[&](int r,int cols,int down,int up)->long long{if(r==n)return 1;int choices=open[r]&~(cols|down|up);long long total=0;while(choices){int bit=choices&-choices;choices-=bit;total+=visit(r+1,cols|bit,((down|bit)<<1)&full,(up|bit)>>1);}return total;};\n    cout<<visit(0,0,0,0);',
+      '        int full=(1<<n)-1;int[] open=new int[n];for(int r=0;r<n;r++)for(int c=0;c<n;c++)if(board[r].charAt(c)==\'.\')open[r]|=1<<c;\n        class Solver { long visit(int r,int cols,int down,int up){if(r==n)return 1;int choices=open[r]&~(cols|down|up);long total=0;while(choices!=0){int bit=choices&-choices;choices-=bit;total+=visit(r+1,cols|bit,((down|bit)<<1)&full,(up|bit)>>1);}return total;} }\n        System.out.print(new Solver().visit(0,0,0,0));',
+      'full=(1<<n)-1\nopen_rows=[sum(1<<c for c,x in enumerate(row) if x==".") for row in board]\ndef visit(r,cols,down,up):\n    if r==n:\n        return 1\n    choices=open_rows[r]&~(cols|down|up)\n    total=0\n    while choices:\n        bit=choices&-choices\n        choices-=bit\n        total+=visit(r+1,cols|bit,((down|bit)<<1)&full,(up|bit)>>1)\n    return total\nprint(visit(0,0,0,0))'),
+    oracle:s=>{const [size,...grid]=s.trim().split(/\s+/),n=Number(size);return String(choose(Array.from({length:n},(_,i)=>String(i))).filter(p=>[...p].every((col,r)=>grid[r][col]==="."&&[...p.slice(0,r)].every((old,i)=>Math.abs(col-old)!==r-i))).length);},
+    hidden:["1\n#\n","1\n.\n","5\n..#..\n.....\n#....\n....#\n.....\n",["12\n"+("............\n").repeat(12),"14200"]],
+    clue:"When the watchers face apart, the floor reveals the silver compass of nested rooms.",treasure:"Silver Compass of Nested Rooms",
+  },
+]);

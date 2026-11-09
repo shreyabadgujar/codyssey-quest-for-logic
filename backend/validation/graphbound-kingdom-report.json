@@ -1,0 +1,65 @@
+{
+  "island": "graphbound-kingdom",
+  "missions": [
+    {
+      "level": 1,
+      "id": "6af04479e741366be7eaf223",
+      "title": "The Citadel Road Census",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 5
+    },
+    {
+      "level": 2,
+      "id": "6af04479e741366be7eaf224",
+      "title": "The Fewest Beacon Relays",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 5
+    },
+    {
+      "level": 3,
+      "id": "6af04479e741366be7eaf225",
+      "title": "The Districts Cut Off",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 5
+    },
+    {
+      "level": 4,
+      "id": "6af04479e741366be7eaf226",
+      "title": "The Gate Opening Order",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 6
+    },
+    {
+      "level": 5,
+      "id": "6af04479e741366be7eaf227",
+      "title": "The Many Quickest Couriers",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 6
+    }
+  ]
+}

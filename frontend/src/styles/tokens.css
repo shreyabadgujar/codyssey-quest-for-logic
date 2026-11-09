@@ -1,0 +1,46 @@
+/* THE AETHERIAN CARTOGRAPHY AESTHETIC — design tokens.
+   Colours are space-separated RGB triplets so Tailwind can apply alpha. */
+:root {
+  /* Colour */
+  --c-parchment-light: 238 224 188;
+  --c-parchment: 224 203 150;
+  --c-parchment-dark: 196 167 110;
+  --c-sepia: 124 90 52;
+  --c-ink: 42 27 18;          /* dark espresso text */
+  --c-brass: 168 128 52;
+  --c-gold: 207 168 76;
+  --c-olive: 107 112 65;
+  --c-olive-dark: 70 76 42;
+  --c-sea: 106 122 112;       /* muted grey-green water wash */
+  --c-oxblood: 122 46 36;     /* wax-seal red: danger / failed tests */
+
+  /* Typography */
+  --font-display: "IM Fell English SC", "IM Fell DW Pica", Georgia, serif;
+  --font-note: "IM Fell DW Pica", Georgia, serif;
+  --font-body: "Spectral", Georgia, serif;
+  --text-xs: 0.8rem; --text-sm: 0.9rem; --text-base: 1.05rem;
+  --text-lg: 1.3rem; --text-xl: 1.8rem; --text-2xl: 2.6rem; --text-3xl: clamp(2.8rem, 7vw, 5rem);
+
+  /* Spacing (4px base) */
+  --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
+  --space-6: 1.5rem; --space-8: 2rem; --space-12: 3rem; --space-16: 4rem;
+
+  /* Borders */
+  --radius-sm: 2px; --radius-md: 4px;
+
+  /* Shadows (warm, never grey-blue) */
+  --shadow-paper: 0 1px 0 rgb(255 255 255 / 0.25) inset, 0 6px 14px -6px rgb(42 27 18 / 0.45);
+  --shadow-lift: 0 10px 24px -8px rgb(42 27 18 / 0.55);
+  --shadow-inset: inset 0 0 18px rgb(124 90 52 / 0.35);
+
+  /* Paper texture: fractal noise as inline SVG, no image asset needed.
+     Replace with /assets/textures/parchment.png when real art exists. */
+  --texture-noise: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.35  0 0 0 0 0.24  0 0 0 0 0.12  0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.35'/></svg>");
+  --texture-stain: radial-gradient(ellipse at 12% 18%, rgb(168 128 52 / 0.28), transparent 45%),
+                   radial-gradient(ellipse at 88% 82%, rgb(124 90 52 / 0.32), transparent 50%),
+                   radial-gradient(ellipse at 70% 10%, rgb(168 128 52 / 0.15), transparent 35%);
+
+  /* Motion */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 180ms;
+}

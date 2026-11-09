@@ -1,0 +1,65 @@
+{
+  "island": "dynamic-programming-dimension",
+  "missions": [
+    {
+      "level": 1,
+      "id": "6af0459ee741366be7eaf269",
+      "title": "The Lantern Stair Toll",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 5
+    },
+    {
+      "level": 2,
+      "id": "6af0459ee741366be7eaf26a",
+      "title": "The Cracked Mosaic Route",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 6
+    },
+    {
+      "level": 3,
+      "id": "6af0459ee741366be7eaf26b",
+      "title": "The Survey Satchel",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 5
+    },
+    {
+      "level": 4,
+      "id": "6af0459ee741366be7eaf26c",
+      "title": "The Aligned Witness Logs",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 5
+    },
+    {
+      "level": 5,
+      "id": "6af0459ee741366be7eaf26d",
+      "title": "The Fused Archive Canisters",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 5
+    }
+  ]
+}

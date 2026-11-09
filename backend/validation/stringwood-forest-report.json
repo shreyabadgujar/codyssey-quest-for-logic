@@ -1,0 +1,65 @@
+{
+  "island": "stringwood-forest",
+  "missions": [
+    {
+      "level": 1,
+      "id": "6af03b53e741366be7eaf117",
+      "title": "The Ledger of Fallen Glyphs",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 5
+    },
+    {
+      "level": 2,
+      "id": "6af03b54e741366be7eaf118",
+      "title": "The Mirrorbark Signature",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 6
+    },
+    {
+      "level": 3,
+      "id": "6af03b54e741366be7eaf119",
+      "title": "The Rearranged Dispatch",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 6
+    },
+    {
+      "level": 4,
+      "id": "6af03b54e741366be7eaf11a",
+      "title": "The Unrepeated Trail",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 6
+    },
+    {
+      "level": 5,
+      "id": "6af03b54e741366be7eaf11b",
+      "title": "The Third Echo",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 6
+    }
+  ]
+}

@@ -1,0 +1,157 @@
+@import "./tokens.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { color-scheme: light; }
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: 1.65;
+    color: rgb(var(--c-ink));
+    background-color: rgb(var(--c-parchment-dark));
+    background-image: var(--texture-noise), var(--texture-stain);
+  }
+  h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: 0.02em; line-height: 1.15; font-weight: 400; }
+  a { color: rgb(var(--c-sepia)); text-underline-offset: 3px; }
+  :focus-visible { outline: 2px solid rgb(var(--c-brass)); outline-offset: 3px; }
+  ::selection { background: rgb(var(--c-gold) / 0.5); }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+}
+
+@layer components {
+  .journal-viewport {
+    top: calc(var(--navigation-height, 0px) + var(--space-3));
+    height: max(0px, calc(100dvh - var(--navigation-height, 0px) - var(--space-6)));
+  }
+  /* Aged paper surface */
+  .paper {
+    background-color: rgb(var(--c-parchment));
+    background-image: var(--texture-noise), var(--texture-stain);
+    box-shadow: var(--shadow-paper), var(--shadow-inset);
+  }
+  /* A page in the explorer's journal: double-ruled border, square corners */
+  .folio {
+    @apply paper relative p-6;
+    border: 1px solid rgb(var(--c-ink) / 0.85);
+    outline: 1px solid rgb(var(--c-brass) / 0.9);
+    outline-offset: -7px;
+    border-radius: var(--radius-sm);
+  }
+  /* Title plaque like the map's cartouches */
+  .cartouche {
+    @apply paper inline-block px-8 py-3 text-center font-display;
+    border: 3px double rgb(var(--c-ink));
+    border-radius: var(--radius-md);
+  }
+  .btn-brass {
+    @apply inline-flex items-center gap-2 px-5 py-2 font-display tracking-wide text-parchment-light;
+    background: linear-gradient(rgb(var(--c-gold)), rgb(var(--c-brass)));
+    border: 1px solid rgb(var(--c-ink));
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-paper);
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), filter var(--dur);
+  }
+  .btn-brass:hover { transform: translateY(-1px); box-shadow: var(--shadow-lift); filter: brightness(1.06); }
+  .btn-brass:active { transform: translateY(1px); filter: brightness(0.95); }
+  .btn-brass:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 px-4 py-2 font-display text-ink;
+    border: 1px solid rgb(var(--c-ink) / 0.7);
+    border-radius: var(--radius-sm);
+    transition: background var(--dur) var(--ease);
+  }
+  .btn-ghost:hover { background: rgb(var(--c-gold) / 0.25); }
+  /* Handwritten-style explorer note */
+  .annotation { @apply font-note italic text-sepia; letter-spacing: 0.03em; }
+  /* Ornamental divider */
+  .rule-ornate {
+    height: 7px; border: 0;
+    border-top: 1px solid rgb(var(--c-ink) / 0.8);
+    border-bottom: 1px solid rgb(var(--c-ink) / 0.8);
+    margin: var(--space-4) 0;
+  }
+  .field {
+    @apply w-full px-3 py-2 text-ink;
+    background: rgb(var(--c-parchment-light) / 0.7);
+    border: 1px solid rgb(var(--c-ink) / 0.6);
+    border-radius: var(--radius-sm);
+    box-shadow: inset 0 1px 4px rgb(42 27 18 / 0.2);
+  }
+
+  /* Custom parchment scrollbars */
+  .custom-parchment-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-parchment-scrollbar::-webkit-scrollbar-track {
+    background: rgb(var(--c-parchment-dark) / 0.35);
+    border-radius: 3px;
+  }
+  .custom-parchment-scrollbar::-webkit-scrollbar-thumb {
+    background: rgb(var(--c-brass) / 0.65);
+    border-radius: 3px;
+  }
+  .custom-parchment-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--c-brass));
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.map-explorer {
+  position: absolute;
+  z-index: 5;
+  width: clamp(20px, 4vw, 36px);
+  aspect-ratio: 3 / 4;
+  transform: translate(-50%, -100%);
+  pointer-events: none;
+  transition: left 650ms var(--ease), top 650ms var(--ease);
+}
+
+.map-explorer-shadow {
+  position: absolute;
+  inset: auto 15% -3% 15%;
+  height: 12%;
+  border-radius: 50%;
+  background: rgb(var(--c-ink) / 0.42);
+  filter: blur(1px);
+}
+
+.map-explorer-pole {
+  position: absolute;
+  inset: 3% auto 0 16%;
+  width: 2px;
+  background: rgb(var(--c-ink));
+}
+
+.map-explorer-pennant {
+  position: absolute;
+  inset: 0 2% 23% 16%;
+  background: rgb(var(--c-brass));
+  padding: 1px 1px 2px;
+  clip-path: polygon(0 0, 100% 0, 100% 82%, 50% 100%, 0 82%);
+  transform-origin: left center;
+  animation: explorer-pennant-idle 3.4s ease-in-out infinite;
+}
+
+.map-explorer-pennant img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+@keyframes explorer-pennant-idle {
+  50% { transform: skewY(3deg) scaleX(0.94); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 200ms ease-out forwards;
+}

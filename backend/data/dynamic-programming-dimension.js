@@ -1,0 +1,103 @@
+const { makeBank } = require("./missionBank");
+const nums=s=>s.trim().split(/\s+/).map(Number);
+const head=(cpp,java,py)=>["    "+cpp+"\n    // Compute and print the result.","        "+java+"\n        // Compute and print the result.",py+"\n# Compute and print the result."];
+const refs=(h,...bodies)=>h.map((code,i)=>code.split(/\n[ ]*(?:\/\/|#) /)[0]+"\n"+bodies[i]);
+const array=head("int n;cin>>n;vector<long long>a(n);for(auto &x:a)cin>>x;","int n=in.nextInt();long[] a=new long[n];for(int i=0;i<n;i++)a[i]=in.nextLong();","n,*a=map(int,sys.stdin.buffer.read().split())");
+const grid=head("int n,m;cin>>n>>m;vector<string> board(n);for(auto &row:board)cin>>row;","int n=in.nextInt(),m=in.nextInt();String[] board=new String[n];for(int i=0;i<n;i++)board[i]=in.next();","tokens=sys.stdin.read().split()\nn,m=map(int,tokens[:2])\nboard=tokens[2:]");
+const items=head("int n,capacity;cin>>n>>capacity;vector<pair<int,long long>> items(n);for(auto &[w,v]:items)cin>>w>>v;","int n=in.nextInt(),capacity=in.nextInt();int[] w=new int[n];long[] value=new long[n];for(int i=0;i<n;i++){w[i]=in.nextInt();value[i]=in.nextLong();}","tokens=iter(map(int,sys.stdin.buffer.read().split()))\nn,capacity=next(tokens),next(tokens)\nitems=[(next(tokens),next(tokens)) for _ in range(n)]");
+const strings=head("string a,b;cin>>a>>b;","String a=in.next(),b=in.next();","a,b=sys.stdin.read().split()");
+const mod=1000000007n;
+let paths=1n;
+for(let i=1n;i<=199n;i++)paths=paths*(199n+i)/i;
+module.exports=makeBank({
+  slug:"dynamic-programming-dimension",name:"Dynamic Programming Dimension",topic:"Dynamic Programming",order:10,
+  description:"Reconstruct the archive's timelines by carrying forward answers to smaller decisions.",
+  image:"/assets/islands/dynamic-programming-dimension.webp",mapPosition:{x:88,y:34},
+  completionReward:{coins:750,xp:1500,artifact:"The Chrono-Memoization Prism"},
+},[
+  {
+    title:"The Lantern Stair Toll",intro:"Each stair records a toll or a rebate. Reach the last stair with the smallest total by choosing between single and double steps.",
+    statement:"Start on step 0 at cost zero. Each move advances by one or two steps. Landing on step i adds its signed cost a[i]. You must land on step n exactly. Find the minimum total cost.",
+    input:"First line: n. Second line: n costs for steps 1 through n.",output:"One integer, the minimum cost.",
+    constraints:"1 ≤ n ≤ 20000. -10^9 ≤ cost ≤ 10^9.",
+    samples:[["4\n3 1 4 2\n","3","Landing on steps 2 and 4 costs 1+2=3."],["3\n-4 -1 2\n","-3","Taking every step collects both rebates before paying the final cost."]],
+    hints:["The last move into a step has only two possible origins.","Compute the cheapest cost of reaching each step in increasing order.","Set dp[0]=0, dp[1]=a[1], and add a[i] to the smaller of dp[i-1] and dp[i-2]."],
+    editorial:"Let dp[i] be the cheapest total for a path ending at step i. For i≥2, the last move comes from i-1 or i-2, and both options pay a[i]. Taking the cheaper previous optimum therefore gives the new optimum. This induction starts with dp[0]=0 and dp[1]=a[1], since only one route reaches step one. Roll the state forward using two values. Negative tolls are allowed and may make extra landings beneficial. Sum with 64-bit arithmetic.",
+    time:"O(n)",space:"O(1) auxiliary",starter:array,
+    reference:refs(array,
+      '    long long prev2=0,prev=a[0];\n    for(int i=1;i<n;i++){long long next=min(prev,prev2)+a[i];prev2=prev;prev=next;}cout<<prev;',
+      '        long prev2=0,prev=a[0];\n        for(int i=1;i<n;i++){long next=Math.min(prev,prev2)+a[i];prev2=prev;prev=next;}System.out.print(prev);',
+      'prev2,prev=0,a[0]\nfor cost in a[1:]:\n    prev2,prev=prev,min(prev2,prev)+cost\nprint(prev)'),
+    oracle:s=>{const [n,...a]=nums(s);const find=i=>i===n?0:i>n?Infinity:Math.min(a[i]+find(i+1),i+1<n?a[i+1]+find(i+2):Infinity);return String(find(0));},
+    hidden:["1\n-1000000000\n","6\n0 -2 0 7 -3 1\n",["20000\n"+Array(20000).fill(-1000000000).join(" ")+"\n","-20000000000000"]],
+    clue:"The final lantern's toll slot conceals a silver stair tally.",treasure:"Silver Stair Tally",
+  },
+  {
+    title:"The Cracked Mosaic Route",intro:"Cracks cut off tiles in the portal mosaic. Count the routes a messenger can take across the remaining tiles without going backward.",
+    statement:"Count paths from the top-left to the bottom-right open tile. Moves are one tile right or down. Blocked tiles cannot be used. If either endpoint is blocked, there are zero routes. Print the count modulo 1000000007.",
+    input:"First line: n m. Then n lines with m characters. Dot means open and # means blocked.",
+    output:"One integer in [0,1000000006].",constraints:"1 ≤ n,m ≤ 200.",
+    samples:[["3 3\n...\n.#.\n...\n","2","Only the paths around the upper-right and lower-left corners avoid the center."],["2 2\n..\n.#\n","0","The destination is blocked."]],
+    hints:["Only the cells immediately above and left can lead into a tile.","Fill counts row by row, setting blocked tiles to zero.","One row of DP suffices: before updating column c it holds the count from above, and c-1 holds the updated count from the left."],
+    editorial:"Set the start count to one if open, and zero otherwise. For each other open cell, add the counts from above and left, treating missing neighbors as zero. These predecessor sets are disjoint because they enter with different last moves, and every valid path enters from one of them. A blocked cell has zero ways. In row-major order, a one-row array supplies the previous row at c and the current row at c-1. Reduce every sum modulo the given number. The same rules cover one row, one column, and an open singleton.",
+    time:"O(nm)",space:"O(m) auxiliary, excluding the grid",starter:grid,
+    reference:refs(grid,
+      '    vector<int> dp(m);dp[0]=1;\n    for(auto &row:board)for(int c=0;c<m;c++){if(row[c]==\'#\')dp[c]=0;else if(c)dp[c]=(dp[c]+dp[c-1])%1000000007;}\n    cout<<dp.back();',
+      '        int[] dp=new int[m];dp[0]=1;\n        for(String row:board)for(int c=0;c<m;c++){if(row.charAt(c)==\'#\')dp[c]=0;else if(c>0)dp[c]=(dp[c]+dp[c-1])%1000000007;}\n        System.out.print(dp[m-1]);',
+      'dp=[1]+[0]*(m-1)\nfor row in board:\n    for c,ch in enumerate(row):\n        if ch=="#":\n            dp[c]=0\n        elif c:\n            dp[c]=(dp[c]+dp[c-1])%1000000007\nprint(dp[-1])'),
+    oracle:s=>{const [n,m,...g]=s.trim().split(/\s+/);const walk=(r,c)=>r>=+n||c>=+m||g[r][c]==="#"?0:r===+n-1&&c===+m-1?1:walk(r+1,c)+walk(r,c+1);return String(walk(0,0));},
+    hidden:["1 1\n.\n","1 1\n#\n","1 5\n..#..\n",["200 200\n"+(".".repeat(200)+"\n").repeat(200),String(paths%mod)]],
+    clue:"The two mosaic paths meet beneath an opal route tile.",treasure:"Opal Route Tile",
+  },
+  {
+    title:"The Survey Satchel",intro:"Evidence crates have different weights and values. Choose the most useful evidence the satchel can hold.",
+    statement:"Choose a subset of the n items with total weight at most C and maximize their total value. Each item may be used at most once. An empty selection is allowed.",
+    input:"First line: n C. Then n lines of item weight and value.",output:"One integer, the maximum total value.",
+    constraints:"1 ≤ n ≤ 200, 0 ≤ C ≤ 2000. 1 ≤ weight ≤ 2000. 0 ≤ value ≤ 10^9.",
+    samples:[["4 7\n2 3\n3 5\n4 8\n6 9\n","13","The weight-3 and weight-4 items fit exactly and give value 5+8."],["1 0\n1 10\n","0","A zero-capacity satchel can hold no positive-weight item."]],
+    hints:["For each item, decide whether to take it or skip it.","Keep the best value for each capacity after processing a prefix of items.","Update capacities from C down to weight so the same item cannot be used twice."],
+    editorial:"Let dp[c] be the best value using processed items with capacity at most c. Initialize every state to zero, the empty subset. For a new item (w,v), either skip it or combine it with an older state of capacity c-w. The latter combination is valid precisely when c≥w. Iterate c in descending order so dp[c-w] still describes only older items. The recurrence checks both exhaustive choices, proving by induction that dp[C] is optimal. Weight zero is excluded, and value totals need 64 bits.",
+    time:"O(nC+n)",space:"O(C) auxiliary",starter:items,
+    reference:refs(items,
+      '    vector<long long> dp(capacity+1);\n    for(auto [w,v]:items)for(int c=capacity;c>=w;c--)dp[c]=max(dp[c],dp[c-w]+v);\n    cout<<dp[capacity];',
+      '        long[] dp=new long[capacity+1];\n        for(int i=0;i<n;i++)for(int c=capacity;c>=w[i];c--)dp[c]=Math.max(dp[c],dp[c-w[i]]+value[i]);\n        System.out.print(dp[capacity]);',
+      'dp=[0]*(capacity+1)\nfor w,value in items:\n    for c in range(capacity,w-1,-1):\n        dp[c]=max(dp[c],dp[c-w]+value)\nprint(dp[capacity])'),
+    oracle:s=>{const [n,cap,...a]=nums(s);let best=0;for(let mask=0;mask<(1<<n);mask++){let w=0,v=0;for(let i=0;i<n;i++)if(mask&(1<<i)){w+=a[2*i];v+=a[2*i+1];}if(w<=cap)best=Math.max(best,v);}return String(best);},
+    hidden:["1 4\n2 3\n","3 5\n2 0\n2 8\n2 8\n",["200 2000\n"+"10 1000000000\n".repeat(200),"200000000000"]],
+    clue:"Inside the satchel's stitched lining is a bronze evidence clasp.",treasure:"Bronze Evidence Clasp",
+  },
+  {
+    title:"The Aligned Witness Logs",intro:"Two witness logs agree on some events but omit different details. Find the longest sequence of events that appears in both in the same order.",
+    statement:"Find the length of a longest common subsequence of strings a and b. A subsequence can skip characters but must preserve their order. It need not be contiguous.",
+    input:"Two lines, containing a and b respectively.",output:"One integer, the longest common subsequence length.",
+    constraints:"1 ≤ |a|,|b| ≤ 1000. Both strings contain only lowercase ASCII letters.",
+    samples:[["abcdgh\naedfhr\n","3","adh occurs in both in that order. The common characters a, d, h are the only ones available."],["aaaa\nbbb\n","0","No character appears in both logs."]],
+    hints:["Think about the answer for two prefixes.","If the last letters differ, at least one of them cannot be paired at the end.","For equal last letters use 1+dp[i-1][j-1]. For different letters use max(dp[i-1][j],dp[i][j-1])."],
+    editorial:"Let dp[i][j] describe the first i and first j letters. Empty prefixes give zero. If the last letters match, appending them to an optimum of both shorter prefixes gives one more match. An optimum can be made to use that final pair: if it already uses one last letter, move its matching position in the other string to the end, and if it uses neither it can append the pair. When last letters differ, an alignment cannot pair both last positions with earlier characters, since those two matches would cross. Drop either final letter and take the larger result. Fill rows from left to right, keeping the previous row. Repeated letters and skipped characters follow the same recurrence.",
+    time:"O(|a||b|)",space:"O(|b|) auxiliary",starter:strings,
+    reference:refs(strings,
+      '    vector<int> prev(b.size()+1),cur(b.size()+1);\n    for(char x:a){for(size_t j=1;j<=b.size();j++)cur[j]=x==b[j-1]?prev[j-1]+1:max(prev[j],cur[j-1]);swap(prev,cur);}cout<<prev.back();',
+      '        int[] prev=new int[b.length()+1],cur=new int[b.length()+1];\n        for(char x:a.toCharArray()){for(int j=1;j<=b.length();j++)cur[j]=x==b.charAt(j-1)?prev[j-1]+1:Math.max(prev[j],cur[j-1]);int[] tmp=prev;prev=cur;cur=tmp;}System.out.print(prev[b.length()]);',
+      'prev=[0]*(len(b)+1)\nfor x in a:\n    cur=[0]*(len(b)+1)\n    for j,y in enumerate(b,1):\n        cur[j]=prev[j-1]+1 if x==y else max(prev[j],cur[j-1])\n    prev=cur\nprint(prev[-1])'),
+    oracle:s=>{const [a,b]=s.trim().split(/\s+/);let best=0;for(let mask=0;mask<(1<<a.length);mask++){const candidate=[...a].filter((_,i)=>mask&(1<<i));let j=0;for(const ch of b)if(ch===candidate[j])j++;if(j===candidate.length)best=Math.max(best,j);}return String(best);},
+    hidden:["z\nz\n","abacaba\nbababca\n",["a".repeat(500)+"b".repeat(500)+"\n"+"b".repeat(500)+"a".repeat(500)+"\n","500"]],
+    clue:"The matching pages identify a copper witness seal hidden in the binding.",treasure:"Copper Witness Seal",
+  },
+  {
+    title:"The Fused Archive Canisters",intro:"The archive canisters must fuse into one vessel without changing their order. Every fusion consumes energy equal to the new vessel's weight.",
+    statement:"Repeatedly merge two adjacent piles into one pile with their combined weight. Pay that combined weight for each merge. Find the minimum total cost to leave one pile. The piles begin in the given linear order and may not be reordered.",
+    input:"First line: n. Second line: n positive pile weights.",output:"One integer, the minimum total merge cost.",
+    constraints:"1 ≤ n ≤ 128. 1 ≤ weight ≤ 10^9. Use 64-bit arithmetic.",
+    samples:[["4\n6 4 4 6\n","40","Merge the left pair and the right pair for 10 each, then merge them for 20. Merging the two middle 4s first costs at least 42."],["3\n4 1 2\n","10","First merge weights 1 and 2 for 3, then merge with 4 for 7."]],
+    hints:["Consider the final merge of a contiguous interval.","Its two inputs must come from a split into two contiguous subintervals.","Compute interval costs by increasing length. Try all splits and add the total weight of the interval, available from prefix sums."],
+    editorial:"Use dp[l][r] for the minimum cost to fuse the half-open interval [l,r). A single pile costs zero. The last merge must combine [l,k) with [k,r) for some l<k<r because every pile remains a contiguous block. Its charge is the sum of the whole interval. For each split, optimal smaller fusions followed by that last merge achieve dp[l][k]+dp[k][r]+sum(l,r). Every possible schedule has one of these final splits, so minimizing this expression is exact. Fill by increasing interval length and use prefix sums for constant-time weights. The greedy rule of choosing the lightest adjacent pair can leave an expensive final split.",
+    time:"O(n³)",space:"O(n²)",starter:array,
+    reference:refs(array,
+      '    vector<long long> p(n+1);for(int i=0;i<n;i++)p[i+1]=p[i]+a[i];vector<vector<long long>> dp(n+1,vector<long long>(n+1));\n    for(int len=2;len<=n;len++)for(int l=0;l+len<=n;l++){int r=l+len;long long best=LLONG_MAX;for(int k=l+1;k<r;k++)best=min(best,dp[l][k]+dp[k][r]);dp[l][r]=best+p[r]-p[l];}cout<<dp[0][n];',
+      '        long[] p=new long[n+1];for(int i=0;i<n;i++)p[i+1]=p[i]+a[i];long[][] dp=new long[n+1][n+1];\n        for(int len=2;len<=n;len++)for(int l=0;l+len<=n;l++){int r=l+len;long best=Long.MAX_VALUE;for(int k=l+1;k<r;k++)best=Math.min(best,dp[l][k]+dp[k][r]);dp[l][r]=best+p[r]-p[l];}System.out.print(dp[0][n]);',
+      'p=[0]\nfor x in a:\n    p.append(p[-1]+x)\ndp=[[0]*(n+1) for _ in range(n+1)]\nfor length in range(2,n+1):\n    for l in range(n-length+1):\n        r=l+length\n        dp[l][r]=min(dp[l][k]+dp[k][r] for k in range(l+1,r))+p[r]-p[l]\nprint(dp[0][n])'),
+    oracle:s=>{const a=nums(s).slice(1);const merge=values=>{if(values.length===1)return 0;let best=Infinity;for(let i=0;i+1<values.length;i++){const w=values[i]+values[i+1];best=Math.min(best,w+merge([...values.slice(0,i),w,...values.slice(i+2)]));}return best;};return String(merge(a));},
+    hidden:["1\n1\n","6\n2 8 1 5 5 3\n",["128\n"+Array(128).fill(1000000000).join(" ")+"\n","896000000000"]],
+    clue:"The final canister opens to reveal the prism that recorded each smaller fusion.",treasure:"Chrono-Fusion Prism",
+  },
+]);

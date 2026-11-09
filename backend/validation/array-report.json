@@ -1,0 +1,185 @@
+{
+  "at": "2026-11-07T21:12:34.163Z",
+  "missions": [
+    {
+      "level": 1,
+      "id": "6aef9241e741366be7eae30a",
+      "title": "The Harbour Ledger",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 7
+    },
+    {
+      "level": 2,
+      "id": "6aef9269e741366be7eae30d",
+      "title": "The Forged Cargo Marks",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 7
+    },
+    {
+      "level": 3,
+      "id": "6aef928be741366be7eae30f",
+      "title": "The Shifted Beacon Ring",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 7
+    },
+    {
+      "level": 4,
+      "id": "6aef92ade741366be7eae310",
+      "title": "The Most Repeated Seal",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 7
+    },
+    {
+      "level": 5,
+      "id": "6aef92cfe741366be7eae312",
+      "title": "The Surveyor's Missing Totals",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 7
+    },
+    {
+      "level": 6,
+      "id": "6aef92f0e741366be7eae313",
+      "title": "The Quiet Patrol Stretch",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 7
+    },
+    {
+      "level": 7,
+      "id": "6aef9312e741366be7eae316",
+      "title": "The Profitable Smuggler Trail",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 7
+    },
+    {
+      "level": 8,
+      "id": "6aef9335e741366be7eae317",
+      "title": "The Exact Tribute",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 7
+    },
+    {
+      "level": 9,
+      "id": "6aef9357e741366be7eae319",
+      "title": "The Paired Crate Cipher",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 7
+    },
+    {
+      "level": 10,
+      "id": "6aef9379e741366be7eae31a",
+      "title": "The Contiguous Safe Cargo",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 7
+    },
+    {
+      "level": 11,
+      "id": "6aef939be741366be7eae31b",
+      "title": "The Shortest Storm Crossing",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 7
+    },
+    {
+      "level": 12,
+      "id": "6aef93bde741366be7eae31c",
+      "title": "The K-Sigil Evidence Chain",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 7
+    },
+    {
+      "level": 13,
+      "id": "6aef93dfe741366be7eae31e",
+      "title": "The Reversed Convoy Orders",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 7
+    },
+    {
+      "level": 14,
+      "id": "6aef9402e741366be7eae326",
+      "title": "The Weakest Link Tribute",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 7
+    },
+    {
+      "level": 15,
+      "id": "6aef9423e741366be7eae32f",
+      "title": "The Final Expedition Windows",
+      "status": "passed",
+      "languages": [
+        "cpp",
+        "java",
+        "python"
+      ],
+      "testsPerLanguage": 7
+    }
+  ]
+}
