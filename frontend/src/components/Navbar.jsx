@@ -1,12 +1,13 @@
 import { useLayoutEffect, useRef } from "react";
 import { NavLink, Link } from "react-router-dom";
-import { Map, Store, Award, User, Shirt, Compass } from "lucide-react";
+import { Map, Store, Award, User, Shirt, Compass, Radio } from "lucide-react";
 import { useAuth } from "../hooks/useAuth.js";
 import PlayerHeader from "./PlayerHeader.jsx";
 
 const links = [
   { to: "/map", label: "World Map", Icon: Map },
   { to: "/dashboard", label: "Captain's Desk", Icon: Compass },
+  { to: "/puzzles", label: "Puzzles", Icon: Radio },
   { to: "/avatar", label: "Avatar", Icon: Shirt },
   { to: "/shop", label: "Shop", Icon: Store },
   { to: "/achievements", label: "Achievements", Icon: Award },
@@ -50,7 +51,7 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             {links.map(({ to, label, Icon }) => (
               <NavLink
-                key={to}
+                key={to} aria-label={label}
                 to={to}
                 className={({ isActive }) =>
                   `inline-flex items-center gap-1 font-display text-sm no-underline transition-colors ${
@@ -75,4 +76,3 @@ export default function Navbar() {
     </header>
   );
 }
-

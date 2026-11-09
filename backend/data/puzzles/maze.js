@@ -1,0 +1,38 @@
+const { entry } = require("./entry");
+function maze(i,id,title,tier,story,goal,grid, switches,gates,checkpoints,required,weights,budget,cost,hints,explanation) {
+  return entry(i,id,title,tier,"maze",story,goal,
+    "Plan a route from S to X using the controls. Dark walls (#) are impassable. Entering a tile pays its energy cost; pressing Activate on a switch costs 1. Switches remain active. Collect every marked checkpoint and finish with the least energy spent.",
+    {grid,switches,gates,checkpoints,required,weights,budget,optimal:true},{cost},hints,explanation);
+}
+module.exports = [
+  maze(4,"hidden-peak","The Hidden Peak","Medium",
+    "The summit sensor needs a cold-weather sample. The obvious ridge is short but covered in snow that drains the suit.",
+    "Collect sample C and reach the summit along a minimum-energy route.",
+    ["S~~~X","..#..","..C.."],{},{},{C:1},1,{"~":4},14,8,
+    ["Snow costs four per tile.","Use the lower corridor to reach the sample.","Climb to the exit on the right of the wall."],
+    "The lower corridor reaches C without touching snow. Four east steps and four vertical steps are the minimum once the sample at row three is mandatory."),
+  maze(6,"island-messenger","The Island Messenger","Hard",
+    "Two relays are separated by a tidal gate. A signal stone can release it, but the straight approach crosses a stretch of rough water.",
+    "Visit relay C and deliver the message at X as cheaply as possible.",
+    ["S~A.X","..#..","a.C.."],{a:1},{A:1},{C:2},2,{"~":4},15,8,
+    ["The gate is optional; inspect the bypass.","C is on the bottom lane.","Avoid both rough water and paying to activate an unnecessary switch."],
+    "The south corridor reaches C, and the east side reaches X without the tidal gate. A shortest route moves east four times and makes two moves down and two up."),
+  maze(6,"bridgekeepers-route","The Bridgekeeper's Route","Expert",
+    "Only the western winch releases bridge A. Beyond it lies a second winch that releases the final bridge. The patrol seal at C must be collected before the exit.",
+    "Open both bridges, collect C, and minimize energy.",
+    ["S.#..X","~aAb#B","..#..C"],{a:1,b:2},{A:1,B:2},{C:4},7,{"~":5},17,11,
+    ["Reach a without entering rough water.","Cross A and turn on b before moving toward C.","The top route and the second bridge are distinct; account for the return from C."],
+    "Approach a via the upper lane, activate it, then cross A to b and activate b. Reach C along the lower lane, cross B upward, then enter X. Every move costs 1, including both activations."),
+  maze(9,"climbing-expedition","The Climbing Expedition","Hard",
+    "Two sample markers lie on different levels of a frost-covered stair. A broken ledge blocks the shortest geometric route.",
+    "Collect C and D and reach the shelter at minimum energy.",
+    ["S.~.X",".#.#.","C...D"],{},{},{C:1,D:2},3,{"~":3},14,8,
+    ["Compare the two possible sample orders.","C lies straight below the start.","Finish on the right after collecting D."],
+    "Go down twice to C, east four tiles to D and up twice to X. A route that visits D first must return all the way from C to the right side."),
+  maze(9,"twin-paths","The Twin Paths","Expert",
+    "An archive needs both phase stamps. Two corridors share the same switch, and leaving the upper passage early can cost a second traversal of the vault.",
+    "Activate a, collect C and D, then take the cheapest route to the exit.",
+    ["S..C#X",".#A.#.","a~.D.."],{a:1},{A:1},{C:2,D:4},7,{"~":3},19,14,
+    ["The switch itself is required, even if another path reaches a checkpoint.","Calculate the cost of crossing the rough bottom tile versus returning to the top.","Decide which checkpoint to collect last to minimize backtracking."],
+    "A 14-energy route returns to the upper corridor after activating a, then collects C before descending to D. Crossing the rough bottom tile and then doubling north through gate A costs 16 instead."),
+];

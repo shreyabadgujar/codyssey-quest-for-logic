@@ -10,4 +10,6 @@ router.use("/submissions", require("./submissionRoutes"));
 router.use("/shop", require("./shopRoutes"));
 router.use("/achievements", require("./achievementRoutes"));
 
+router.use("/puzzles", require("./puzzleRoutes"));
+
 module.exports = router;

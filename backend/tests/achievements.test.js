@@ -4,9 +4,9 @@ const catalogue = require("../data/achievements");
 const Achievement = require("../models/Achievement");
 const { summarizeProgress, publicAchievement, unlockEligible } = require("../services/achievementService");
 
-test("catalogue has twelve distinct valid entries and three unavailable dependencies", () => {
-  assert.equal(catalogue.length, 12);
-  assert.equal(new Set(catalogue.map(item => item._id)).size, 12);
+test("catalogue has thirteen distinct valid entries and three unavailable dependencies", () => {
+  assert.equal(catalogue.length, 13);
+  assert.equal(new Set(catalogue.map(item => item._id)).size, 13);
   for (const entry of catalogue) assert.equal(new Achievement(entry).validateSync(), undefined);
   assert.deepEqual(catalogue.filter(item => item.unavailable).map(item => item.key),
     ["treasure-hunter", "secret-seeker", "legend-of-codyssey"]);

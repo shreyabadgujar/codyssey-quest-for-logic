@@ -10,7 +10,8 @@ const rows = [
   ["treasure-hunter", "Treasure Hunter", "collection", "Recover a real treasure from the islands.", "Collect your first in-game treasure.", null, 1, { coins: 40 }, null, "Treasure collection is not available yet."],
   ["secret-seeker", "Secret Seeker", "hidden", "You followed a clue beyond the known chart.", "Complete a hidden bonus challenge.", null, 1, { badge: true }, null, "Hidden bonus challenges are not available yet."],
   ["persistent-explorer", "Persistent Explorer", "hidden", "You returned to the expedition on three different days.", "Complete missions on 3 separate UTC calendar days.", "days", 3, { coins: 60 }],
-  ["legend-of-codyssey", "Legend of Codyssey", "hidden", "Every other honour is recorded under your name.", "Unlock every other achievement.", null, 11, { title: "Legend of Codyssey" }, null, "Requires the unavailable treasure and bonus challenge achievements."],
+  ["legend-of-codyssey", "Legend of Codyssey", "hidden", "Every other honour is recorded under your name.", "Unlock every other achievement.", null, 12, { title: "Legend of Codyssey" }, null, "Requires all other achievements, including unavailable challenges."],
+  ["first-mystery-solved", "First Mystery Solved", "exploration", "The first artifact has yielded its transmission.", "Solve one artifact puzzle.", "puzzles", 1, { badge: true }, "first-discovery"],
 ];
 
 module.exports = rows.map(([key, name, category, description, condition, metric, threshold, reward, badge, unavailable], index) => ({

@@ -105,6 +105,7 @@ export default function Mission() {
           </div>
         </div>
       )}
+      {result?.rewards?.puzzleMilestone && <div className="folio space-y-2"><h3 className="text-xl">Artifact signal discovered</h3><p>Two more coding cases have awakened an artifact. Explore it now or keep charting the islands.</p><Link to="/puzzles" className="btn-brass no-underline">Open Artifact Archive</Link></div>}
       {result?.rewards&&<div className="paper p-4 border-2 border-brass space-y-2"><h3 className="text-xl">Case solved</h3><p>{result.rewards.firstCompletion?`Awarded ${result.rewards.xp} XP and ${result.rewards.coins} coins.`:"Previously completed — no duplicate rewards."}</p><p>{result.clue}</p>{mission.nextMissionId&&<Link className="btn-brass no-underline" to={`/missions/${mission.nextMissionId}`}>Open Case {mission.level+1} →</Link>}</div>}
     </section>
   </div>;

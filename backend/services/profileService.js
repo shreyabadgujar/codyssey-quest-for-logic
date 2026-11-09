@@ -2,13 +2,15 @@ const Island = require("../models/Island");
 const Mission = require("../models/Mission");
 const Progress = require("../models/Progress");
 const ShopItem = require("../models/ShopItem");
+const PuzzleSession = require("../models/PuzzleSession");
+const { byId: puzzles } = require("../data/puzzles");
 const User = require("../models/User");
 const { listAchievements, summarizeProgress } = require("./achievementService");
 
 const newest = (a, b) => new Date(b.at) - new Date(a.at) || a.id.localeCompare(b.id);
 const validDate = date => date instanceof Date && Number.isFinite(date.getTime());
 
-function buildJournal({ player, islands, missions, progress, badges, shopItems }) {
+function buildJournal({ player, islands, missions, progress, badges, shopItems, solvedPuzzles = [] }) {
   const missionById = new Map(missions.map(mission => [String(mission._id), mission]));
   const ownedIds = new Set((player.inventory ?? []).map(String));
   const itemById = new Map(shopItems.filter(item => ownedIds.has(String(item._id))).map(item => [String(item._id), {
@@ -46,6 +48,11 @@ function buildJournal({ player, islands, missions, progress, badges, shopItems }
     ...earned.filter(item => validDate(item.unlockedAt)).map(item => ({
       id: "achievement-" + item.key, kind: "achievement", name: item.name, at: item.unlockedAt, href: "/achievements",
     })),
+    ...solvedPuzzles.flatMap(row => {
+      const puzzle = puzzles.get(row.puzzleId);
+      return puzzle && validDate(row.completedAt) ? [{ id: "puzzle-" + row._id, kind: "puzzle",
+        name: puzzle.title, coins: row.coinsAwarded, at: row.completedAt, href: "/puzzles/" + row._id }] : [];
+    }),
     ...purchases.map(item => ({
       id: "purchase-" + item.id, kind: "purchase", name: item.name, at: item.at, href: "/shop",
     })),
@@ -65,16 +72,17 @@ function buildJournal({ player, islands, missions, progress, badges, shopItems }
 }
 
 async function getProfileJournal(userId) {
-  const [islands, missions, progress] = await Promise.all([
+  const [islands, missions, progress, solvedPuzzles] = await Promise.all([
     Island.find().sort({ order: 1 }).select("slug name topic").lean(),
     Mission.find().select("island title").lean(),
     Progress.find({ user: userId, status: "completed" }).select("mission completedAt flawless").lean(),
+    PuzzleSession.find({ user: userId, status: "completed" }).select("puzzleId completedAt coinsAwarded").lean(),
   ]);
   const badges = await listAchievements(userId, summarizeProgress(missions, progress));
   const player = await User.findById(userId).select("-passwordHash").lean();
   if (!player) throw Object.assign(new Error("Explorer account not found."), { status: 404, code: "USER_NOT_FOUND" });
   const shopItems = await ShopItem.find({ _id: { $in: player.inventory ?? [] } }).select("name slot visual asset").lean();
-  return buildJournal({ player, islands, missions, progress, badges, shopItems });
+  return buildJournal({ player, islands, missions, progress, badges, shopItems, solvedPuzzles });
 }
 
 module.exports = { getProfileJournal, buildJournal };

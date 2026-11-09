@@ -13,6 +13,7 @@ import AvatarCustomizer from "./pages/AvatarCustomizer.jsx";
 import Shop from "./pages/Shop.jsx";
 import Profile from "./pages/Profile.jsx";
 import Achievements from "./pages/Achievements.jsx";
+import Puzzles from "./pages/Puzzles.jsx";
 import NotFound from "./pages/NotFound.jsx";
 
 export default function App() {
@@ -33,6 +34,8 @@ export default function App() {
           <Route path="avatar" element={<AvatarCustomizer />} />
           <Route path="shop" element={<Shop />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="puzzles" element={<Puzzles />} />
+          <Route path="puzzles/:id" element={<Puzzles />} />
           <Route path="achievements" element={<Achievements />} />
         </Route>
         <Route path="*" element={<NotFound />} />

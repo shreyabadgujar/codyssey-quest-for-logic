@@ -47,3 +47,22 @@ First mission completions may include newly earned badges in `data.rewards.achie
 - Successful submission rewards are `{ xp, coins, firstCompletion }`; repeated completion returns zero rewards. Completion and user balance changes share a MongoDB transaction (Atlas/replica set required).
 - Comparator normalizes CRLF/CR, strips trailing spaces/tabs per line and terminal newlines. Leading whitespace, interior spacing, blank interior lines and case remain significant. An explicitly configured `unorderedLines` validator preserves duplicate counts.
 - Mission reference validation covers C++17, Java and Python 3. Tests, references, description, limits, and validator changes invalidate the stored fingerprint. Hidden, reference, and validation fields use `select: false`.
+
+## Artifact puzzles (authenticated)
+
+The archive unlocks one puzzle per two distinct successfully rewarded coding missions. A first-completion submission response includes `rewards.puzzleMilestone` on an eligible even milestone. Puzzle play never gates coding progression.
+
+| Method | Path | Behavior |
+| --- | --- | --- |
+| GET | `/api/puzzles` | Assigns any earned but unassigned milestones, then returns `catalogue`, `current`, newest-first `history`, `missionsCompleted`, `missionsToNext` and `exhausted`. Assignments are persisted; concurrent requests cannot reroll them. |
+| GET | `/api/puzzles/:id` | Reads a player-owned session and its public puzzle data, draft, revision, unlocked hints and verdict. Solution explanation appears only after completion. |
+| POST | `/api/puzzles/:id/start` | Activates or resumes a session. Also revisits a skipped puzzle and restores its draft. |
+| POST | `/api/puzzles/:id/draft` | Saves the mechanic-specific draft. Body: `{ revision, draft }`. |
+| POST | `/api/puzzles/:id/hint` | Unlocks the next hint, up to the number of authored hints. |
+| POST | `/api/puzzles/:id/reset` | Clears the draft and last verdict; preserves unlocked hints and attempt count. |
+| POST | `/api/puzzles/:id/skip` | Archives a pending session as skipped; it remains available through history. |
+| POST | `/api/puzzles/:id/submit` | Validates the saved draft. Returns `correct`, `incorrect`, `incomplete` or `invalid`. On first success, returns `awarded` and any newly unlocked achievements. A repeated solve returns `alreadyRewarded` without crediting coins. |
+
+Other POST bodies are `{ revision }`; revisions come from the latest session response. A stale write returns `409 PUZZLE_CONFLICT`; reload to resume the server's saved state. Invalid or unowned session IDs return `404 PUZZLE_NOT_FOUND`. Journal activity may include `{ kind: "puzzle", coins, ... }`.
+
+Each `catalogue` entry contains `puzzleId`, `title`, `islandId`, `islandName`, `difficulty`, `synopsis`, `mechanic` and `status`. Assigned entries also contain the signed-in player's `sessionId` and `sessionStatus`. An assigned trial is `available` (including active and skipped) or `completed`. An unassigned trial is `upcoming` only when one successful mission remains and the trial is a candidate for the next draw. Other unassigned trials are `locked`. Upcoming and locked entries are previews and have no session ID. When `exhausted` is true, there is no further draw.
