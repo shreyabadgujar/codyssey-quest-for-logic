@@ -1,5 +1,8 @@
 # Codyssey – Quest for Logic 🏝️
 
+**🌐 Live Demo:** https://codyssey-quest-for-logic.vercel.app
+**📂 GitHub Repository:** https://github.com/shreyabadgujar/codyssey-quest-for-logic
+
 A little different from the usual way of learning DSA!
 
 **Codyssey** is a detective-adventure game where you explore different islands, solve coding problems, uncover clues, and collect rewards along the way. Each island focuses on a different Data Structures and Algorithms topic, with challenges that get progressively harder.
