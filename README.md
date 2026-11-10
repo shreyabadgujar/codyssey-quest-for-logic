@@ -1,6 +1,6 @@
 # Codyssey – Quest for Logic 🏝️
 
-**🌐 Live Demo:** https://codyssey-quest-for-logic.vercel.app
+**🌐 Live Demo:** https://codyssey-quest-for-logic.vercel.app<br>
 **📂 GitHub Repository:** https://github.com/shreyabadgujar/codyssey-quest-for-logic
 
 A little different from the usual way of learning DSA!
