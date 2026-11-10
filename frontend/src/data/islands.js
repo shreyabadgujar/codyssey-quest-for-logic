@@ -1,5 +1,11 @@
 import { DEFAULT_LEVELS_PER_ISLAND } from "../game/constants.js";
 
+export function getIslandArtwork(id) {
+  const directory = "/assets/islands/atlas";
+  const filename = `${id}.webp`;
+  return { illustration: `${directory}/${filename}`, marker: `${directory}/markers/${filename}` };
+}
+
 // Static island catalogue. Image assets are in public/assets/islands/*.webp.
 // mapPosition = percent of the world-map image (x: left→right, y: top→bottom).
 export const ISLANDS = [

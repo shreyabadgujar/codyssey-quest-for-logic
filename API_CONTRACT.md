@@ -10,7 +10,7 @@ Success `{ "data": ... }` · Error `{ "error": { "message": "", "code": "" } }`
 | POST | /auth/login | public | `{ email, password }` → `{ user, token }` |
 | GET | /auth/me | yes | Current user |
 | GET | /users/me | yes | Full profile: xp, level, coins, avatar, inventory, streak |
-| GET | /users/me?view=journal | yes | Personal expedition journal: player, stats, expeditions, achievements, inventory, and up to 8 dated activity entries |
+| GET | /users/me?view=journal | yes | Personal expedition journal with puzzle totals, public achievement records and summary, full owned inventory, equipped cosmetics, and up to 8 dated activity entries |
 | PATCH | /users/me/avatar | yes | `{ base: "explorer-01" }` or `{ slot, itemId }` → updated profile |
 | POST | /users/me/streak/claim | yes | Claim daily streak reward (server decides amount) |
 | GET | /islands | yes | All islands + per-user completion status and `lastCompletedAt` per island |

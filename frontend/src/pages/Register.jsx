@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AlertCircle } from "lucide-react";
+import { Feather } from "lucide-react";
+import { ExpeditionAuth } from "../components/ExpeditionAuth.jsx";
 import { register } from "../services/authService.js";
 import { useAuth } from "../hooks/useAuth.js";
 
@@ -59,23 +60,17 @@ export default function Register() {
   };
 
   return (
-    <section className="folio max-w-md mx-auto">
-      <h1 className="text-3xl">Start a New Journal</h1>
-      <hr className="rule-ornate" />
-      {error && (
-        <div
-          role="alert"
-          className="flex items-start gap-2 p-3 mb-4 text-sm text-oxblood border border-oxblood/40 bg-oxblood/10 rounded-sm font-body"
-        >
-          <AlertCircle size={18} className="shrink-0 mt-0.5" aria-hidden />
-          <span>{error}</span>
-        </div>
-      )}
-      <form className="grid gap-4" onSubmit={handleSubmit}>
-        <label className="grid gap-1">
+    <ExpeditionAuth
+      variant="register"
+      title="Begin Your Expedition"
+      introduction="Every great explorer starts with a single step. Create your identity and enter the world of Codyssey."
+      error={error}
+      alternate={<>Already sailing? <Link to="/login">Sign in</Link></>}
+    >
+      <form className="entry-auth-form" onSubmit={handleSubmit}>
+        <label>
           Explorer name
           <input
-            className="field"
             name="username"
             value={formData.username}
             onChange={handleChange}
@@ -85,10 +80,9 @@ export default function Register() {
             disabled={loading}
           />
         </label>
-        <label className="grid gap-1">
+        <label>
           Email
           <input
-            className="field"
             type="email"
             name="email"
             value={formData.email}
@@ -99,10 +93,9 @@ export default function Register() {
             disabled={loading}
           />
         </label>
-        <label className="grid gap-1">
+        <label>
           Password
           <input
-            className="field"
             type="password"
             name="password"
             value={formData.password}
@@ -114,16 +107,11 @@ export default function Register() {
             disabled={loading}
           />
         </label>
-        <button
-          className="btn-brass justify-center"
-          type="submit"
-          disabled={loading}
-        >
-          {loading ? "Inscribing Journal..." : "Create Journal"}
+        <button className="entry-button entry-button-gold" type="submit" disabled={loading}>
+          {loading ? "Inscribing journal…" : "Create Journal"}
+          <Feather size={17} aria-hidden="true" />
         </button>
       </form>
-      <p className="annotation mt-4">Already sailing? <Link to="/login">Log in</Link></p>
-    </section>
+    </ExpeditionAuth>
   );
 }
-

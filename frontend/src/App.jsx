@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout.jsx";
+import PublicLayout from "./layouts/PublicLayout.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Landing from "./pages/Landing.jsx";
 import Login from "./pages/Login.jsx";
@@ -19,11 +20,13 @@ import NotFound from "./pages/NotFound.jsx";
 export default function App() {
   return (
     <Routes>
-      <Route element={<MainLayout />}>
+      <Route element={<PublicLayout />}>
         <Route index element={<Landing />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
+      </Route>
 
+      <Route element={<MainLayout />}>
         {/* Game routes require login. Server still enforces unlock state. */}
         <Route element={<ProtectedRoute />}>
           <Route path="dashboard" element={<Dashboard />} />

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Award, BookOpen, ShoppingBag, Radio } from "lucide-react";
+import { ArrowUpRight, Award, BookOpen, Feather, Radio, ShoppingBag } from "lucide-react";
 import { journalDate } from "../utils/journalDate.js";
 
 const actions = {
@@ -11,21 +11,22 @@ const actions = {
 
 export function ProfileActivity({ activity }) {
   return (
-    <section className="folio space-y-3">
-      <h2 className="text-2xl">Recent entries</h2>
-      {activity.length ? <ol className="divide-y divide-ink/15">
+    <section className="ec-sheet ec-activity" aria-labelledby="ec-activity-title">
+      <div className="ec-section-heading">
+        <div><p className="ec-kicker"><Feather size={17} aria-hidden="true" /> From the expedition journal</p><h2 id="ec-activity-title">Recent Entries</h2></div>
+        <p className="ec-note">Latest first</p>
+      </div>
+      {activity.length ? <ol className="ec-timeline">
         {activity.map(event => {
           const { Icon, label } = actions[event.kind];
-          return <li key={event.id} className="flex items-start gap-3 py-2">
-            <Icon className="mt-1 shrink-0 text-brass" size={18} aria-hidden="true" />
-            <div className="min-w-0 flex-1">
-              <p className="annotation text-xs">{label}{event.kind === "puzzle" ? " · +" + event.coins + " coins" : ""}</p>
-              <Link className="font-display underline-offset-4 hover:underline" to={event.href}>{event.name}</Link>
-            </div>
-            <time className="annotation shrink-0 text-xs" dateTime={event.at}>{journalDate(event.at)}</time>
+          return <li key={event.id} data-kind={event.kind}>
+            <span className="ec-event-seal"><Icon size={18} aria-hidden="true" /></span>
+            <div><p>{label}{event.kind === "puzzle" && event.coins > 0 ? ` · +${event.coins} coins` : ""}</p>
+              <Link to={event.href}>{event.name} <ArrowUpRight size={13} aria-hidden="true" /></Link></div>
+            <time dateTime={event.at}>{journalDate(event.at)}</time>
           </li>;
         })}
-      </ol> : <p>Your journal is ready for its first dated entry.</p>}
+      </ol> : <p className="ec-empty">Your journal is ready for its first dated entry.</p>}
     </section>
   );
 }

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AlertCircle } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { ExpeditionAuth } from "../components/ExpeditionAuth.jsx";
 import { login } from "../services/authService.js";
 import { useAuth } from "../hooks/useAuth.js";
 
@@ -44,23 +45,17 @@ export default function Login() {
   };
 
   return (
-    <section className="folio max-w-md mx-auto">
-      <h1 className="text-3xl">Return to Your Journal</h1>
-      <hr className="rule-ornate" />
-      {error && (
-        <div
-          role="alert"
-          className="flex items-start gap-2 p-3 mb-4 text-sm text-oxblood border border-oxblood/40 bg-oxblood/10 rounded-sm font-body"
-        >
-          <AlertCircle size={18} className="shrink-0 mt-0.5" aria-hidden />
-          <span>{error}</span>
-        </div>
-      )}
-      <form className="grid gap-4" onSubmit={handleSubmit}>
-        <label className="grid gap-1">
+    <ExpeditionAuth
+      variant="login"
+      title="Welcome Back, Explorer"
+      introduction="Your expedition awaits. Continue uncovering the secrets of Codyssey."
+      error={error}
+      alternate={<>New explorer? <Link to="/register">Start a journal</Link></>}
+    >
+      <form className="entry-auth-form" onSubmit={handleSubmit}>
+        <label>
           Email
           <input
-            className="field"
             type="email"
             name="email"
             value={formData.email}
@@ -71,10 +66,9 @@ export default function Login() {
             disabled={loading}
           />
         </label>
-        <label className="grid gap-1">
+        <label>
           Password
           <input
-            className="field"
             type="password"
             name="password"
             value={formData.password}
@@ -85,12 +79,11 @@ export default function Login() {
             disabled={loading}
           />
         </label>
-        <button className="btn-brass justify-center" type="submit" disabled={loading}>
-          {loading ? "Opening journal..." : "Log in"}
+        <button className="entry-button entry-button-gold" type="submit" disabled={loading}>
+          {loading ? "Opening journal…" : "Sign In"}
+          <ArrowRight size={17} aria-hidden="true" />
         </button>
       </form>
-      <p className="annotation mt-4">New explorer? <Link to="/register">Start a journal</Link></p>
-    </section>
+    </ExpeditionAuth>
   );
 }
-

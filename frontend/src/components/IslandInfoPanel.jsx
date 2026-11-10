@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { X, Lock, CheckCircle2, Compass, Award, ChevronDown, ChevronUp } from "lucide-react";
+import { getIslandArtwork } from "../data/islands.js";
 import { useProgression } from "../game/progression.js";
 import { getIsland } from "../services/gameService.js";
 import CoinDisplay from "./CoinDisplay.jsx";
@@ -16,6 +17,7 @@ export default function IslandInfoPanel({ island: metadata, onClose, initialColl
 
   if (!island) return null;
 
+  const { illustration } = getIslandArtwork(metadata.id);
   const isCurrentIslandPage = location.pathname === `/islands/${island.id}`;
   const totalLevels = island.totalLevels || 5;
   const completedCount = progress.completedCount || 0;
@@ -97,7 +99,7 @@ export default function IslandInfoPanel({ island: metadata, onClose, initialColl
             >
               {!imgError ? (
                 <img
-                  src={island.image}
+                  src={illustration}
                   alt={island.name}
                   className="w-full h-full object-cover"
                   onError={() => setImgError(true)}

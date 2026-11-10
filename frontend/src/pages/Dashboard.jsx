@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth.js";
-import { ISLANDS } from "../data/islands.js";
+import { getIslandArtwork, ISLANDS } from "../data/islands.js";
 import { useProgression, getIslandProgress } from "../game/progression.js";
 import PlayerProfileSummary from "../components/PlayerProfileSummary.jsx";
 import CoinDisplay from "../components/CoinDisplay.jsx";
@@ -96,7 +96,7 @@ export default function Dashboard() {
                     style={{ aspectRatio: "16 / 11" }}
                   >
                     <img
-                      src={`/assets/islands/atlas/${island.id}.webp`}
+                      src={getIslandArtwork(island.id).illustration}
                       alt={island.name}
                       className="w-full h-full object-cover"
                       loading="lazy"

@@ -11,10 +11,11 @@ const placement = {
   "explorer-04": { pin: { left: "64%", top: "44%" }, companion: { bottom: "9%" } },
 };
 
-export function EquippedPortrait({ avatar, equipment }) {
+export function EquippedPortrait({ avatar, equipment, showcase = false }) {
   const { frame, background, pin, companion } = equipment;
   const [failedAssets, setFailedAssets] = useState({});
-  if (!frame && !background && !pin && !companion) {
+  const hasEquipment = Boolean(frame || background || pin || companion);
+  if (!showcase && !hasEquipment) {
     return <div className="mx-auto max-w-48"><AvatarArtwork avatar={avatar} /></div>;
   }
 
@@ -26,13 +27,13 @@ export function EquippedPortrait({ avatar, equipment }) {
   const fail = asset => setFailedAssets(previous => ({ ...previous, [asset]: true }));
 
   return (
-    <div className="relative isolate mx-auto max-w-sm overflow-hidden border border-ink/25 bg-parchment-light px-3 py-4"
-      role="group" aria-label={`${avatar.name} with equipment`}>
+    <div className={`relative isolate mx-auto overflow-hidden border border-ink/25 bg-parchment-light px-3 py-4 ${showcase ? "ec-portrait-stage" : "max-w-sm"}`}
+      role="group" aria-label={hasEquipment ? `${avatar.name} with equipment` : avatar.name}>
       {usable(backgroundArt) && (
         <img src={backgroundArt} alt={background.name} onError={() => fail(backgroundArt)}
           className="absolute inset-0 -z-10 h-full w-full object-cover" />
       )}
-      <PortraitFrame frame={frame} className="mx-auto w-[62%] max-w-48">
+      <PortraitFrame frame={frame} foreground={showcase} className={showcase ? "ec-portrait-mount mx-auto w-[62%]" : "mx-auto w-[62%] max-w-48"}>
         <AvatarArtwork avatar={avatar} layered />
         {pin && (
           <span role="img" aria-label={pin.name} style={offsets.pin}
@@ -45,7 +46,7 @@ export function EquippedPortrait({ avatar, equipment }) {
       </PortraitFrame>
       {companion && (
         <span role="img" aria-label={companion.name} style={offsets.companion}
-          className="absolute right-[2%] grid aspect-square w-[27%] max-w-24 place-items-end">
+          className={`absolute right-[2%] grid aspect-square place-items-end ${showcase ? "z-10 w-[22%] max-w-28" : "w-[27%] max-w-24"}`}>
           {usable(companionArt)
             ? <img src={companionArt} alt="" className="absolute inset-0 h-full w-full object-contain object-bottom drop-shadow" onError={() => fail(companionArt)} />
             : <PawPrint className="mx-auto h-1/2 w-1/2 text-olive-dark" aria-hidden="true" />}

@@ -1,224 +1,97 @@
-import { useState, useMemo } from "react";
-import { useJournalOverlay } from "../hooks/useJournalOverlay.js";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { ISLANDS } from "../data/islands.js";
-import IslandMarker from "../components/IslandMarker.jsx";
+import { Check, Compass, LockKeyhole, Maximize2, Minimize2, Navigation, RotateCcw } from "lucide-react";
 import IslandInfoPanel from "../components/IslandInfoPanel.jsx";
-import OrnateFrame from "../components/ui/OrnateFrame.jsx";
-import { useProgression, getIslandProgress } from "../game/progression.js";
-import { AlertCircle, RotateCcw } from "lucide-react";
-import { useAuth } from "../hooks/useAuth.js";
+import IslandMarker from "../components/IslandMarker.jsx";
 import { MapExplorer } from "../components/MapExplorer.jsx";
+import WorldMapTerrain from "../components/WorldMapTerrain.jsx";
+import OrnateFrame from "../components/ui/OrnateFrame.jsx";
+import { ISLANDS } from "../data/islands.js";
+import { chartPosition, STARTING_BERTH, WORLD_MAP_LAYOUT } from "../data/worldMapLayout.js";
 import { getExplorerPosition } from "../game/explorerPosition.js";
+import { getIslandProgress, useProgression } from "../game/progression.js";
+import { useAuth } from "../hooks/useAuth.js";
+import { useJournalOverlay } from "../hooks/useJournalOverlay.js";
+import "../styles/world-map.css";
 
 export default function WorldMap() {
   const [selectedIslandId, setSelectedIslandId] = useState(null);
-  const [mapError, setMapError] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [tabAppearance, setTabAppearance] = useState(null);
   const overall = useProgression();
   const { user } = useAuth();
-  const explorerPosition = getExplorerPosition(ISLANDS, getIslandProgress);
+  const userId = user?._id;
+  const explorer = tabAppearance && tabAppearance._id === userId ? tabAppearance : user;
+  const { label } = getExplorerPosition(ISLANDS, getIslandProgress);
+  const currentIsland = ISLANDS.find(island => island.name === label);
+  const berth = currentIsland ? WORLD_MAP_LAYOUT[currentIsland.id].berth : STARTING_BERTH;
+  const selectedIsland = ISLANDS.find(island => island.id === selectedIslandId);
 
   useJournalOverlay(Boolean(selectedIslandId), () => setSelectedIslandId(null), true);
 
-  const selectedIsland = useMemo(
-    () => ISLANDS.find((i) => i.id === selectedIslandId) || null,
-    [selectedIslandId]
-  );
-
-  // Generate unique nautical voyage trade routes between islands
-  const tradeRoutes = useMemo(() => {
-    const routeSet = new Set();
-    const connections = [];
-
-    ISLANDS.forEach((source) => {
-      source.routes?.forEach((targetId) => {
-        const target = ISLANDS.find((i) => i.id === targetId);
-        if (target) {
-          const key = [source.id, target.id].sort().join("<->");
-          if (!routeSet.has(key)) {
-            routeSet.add(key);
-            connections.push({
-              id: key,
-              from: source.mapPosition,
-              to: target.mapPosition,
-              active: selectedIslandId === source.id || selectedIslandId === target.id,
-            });
-          }
-        }
-      });
-    });
-
-    return connections;
-  }, [selectedIslandId]);
+  useEffect(() => {
+    function syncExplorer(event) {
+      if (event.key !== "codyssey_user" || !event.newValue || !userId) return;
+      try {
+        const { _id, avatar, inventory } = JSON.parse(event.newValue);
+        if (_id === userId) setTabAppearance({ _id, avatar, inventory });
+      } catch {
+        // Keep the authenticated explorer if a storage update is malformed.
+      }
+    }
+    window.addEventListener("storage", syncExplorer);
+    return () => window.removeEventListener("storage", syncExplorer);
+  }, [userId]);
 
   return (
-    <div className="space-y-4">
-      {/* Map Plaque Cartouche & Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="wm-page">
+      <header className="wm-heading">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="font-display text-2xl sm:text-3xl text-ink leading-tight">
-              The Archipelago of Ætheria
-            </h1>
-            <span className="annotation text-xs sm:text-sm text-sepia hidden md:inline">
-              Ten Realms of Logic
-            </span>
-          </div>
-          <p className="annotation text-xs sm:text-sm text-sepia mt-0.5">
-            Click any island marker to open its mission journal and chart your next voyage.
-          </p>
+          <p className="wm-kicker"><Compass size={15} aria-hidden="true" /> The Grand Sea Chart</p>
+          <h1>The Archipelago of Ætheria</h1>
+          <p className="annotation text-xs sm:text-sm">Follow the sea lanes to an island and open its expedition journal.</p>
         </div>
-
-        {/* Quick Map Legend / Status */}
-        <div className="flex items-center gap-2 text-xs">
-          <div className="paper px-3 py-1.5 rounded-sm border border-ink/40 flex items-center gap-2 shadow-xs">
-            <span className="inline-block w-2.5 h-2.5 rounded-full bg-olive-dark shadow-xs" />
-            <span className="font-display text-ink">
-              {overall.completedIslands} / {overall.totalIslands} Islands Cleared
-            </span>
-          </div>
-          {selectedIslandId && (
-            <button
-              onClick={() => setSelectedIslandId(null)}
-              className="btn-ghost text-xs py-1 px-2.5 text-sepia hover:text-ink inline-flex items-center gap-1"
-            >
-              <RotateCcw size={13} />
-              <span>Deselect</span>
-            </button>
-          )}
+        <div className="wm-status">
+          <span className="wm-clear-count"><Check size={15} aria-hidden="true" /> {overall.completedIslands} / {overall.totalIslands} Islands Cleared</span>
+          {selectedIslandId && <button type="button" onClick={() => setSelectedIslandId(null)} className="btn-ghost text-xs py-1 px-2.5"><RotateCcw size={13} /> Deselect</button>}
         </div>
-      </div>
+      </header>
 
-      {/* Main Interactive Map Centerpiece (Full Width, never squished) */}
-      <div className="w-full">
-        <OrnateFrame className="overflow-hidden">
-          {/* Aspect Ratio Box matching aetheria-map.webp (1456 x 1144 = 182 / 143) */}
-          <div
-            className="relative w-full rounded-sm overflow-hidden select-none"
-            style={{
-              aspectRatio: "1456 / 1144",
-              background: "rgb(var(--c-parchment-dark))",
-            }}
-          >
-            {/* Map Image */}
-            {!mapError ? (
-              <img
-                src="/assets/maps/aetheria-map.webp"
-                alt="World Map of Ætheria"
-                className="w-full h-full object-contain pointer-events-none select-none"
-                onError={() => setMapError(true)}
-              />
-            ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center text-oxblood bg-oxblood/10">
-                <AlertCircle size={40} className="mb-2" />
-                <h3 className="font-display text-lg">World Map Asset Missing</h3>
-                <p className="annotation text-xs mt-1 max-w-sm">
-                  Could not load <code>/assets/maps/aetheria-map.webp</code>. Please verify the file exists in the public directory.
-                </p>
-              </div>
-            )}
-
-            {/* SVG Nautical Voyage Dotted Paths Layer */}
-            <svg
-              viewBox="0 0 100 100"
-              preserveAspectRatio="none"
-              className="absolute inset-0 w-full h-full pointer-events-none z-0"
-            >
-              <defs>
-                <filter id="route-glow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feDropShadow dx="0" dy="1" stdDeviation="0.5" floodColor="rgb(42, 27, 18)" floodOpacity="0.4" />
-                </filter>
-              </defs>
-              {tradeRoutes.map((route) => {
-                // Calculate slight curve between islands for hand-drawn look
-                const midX = (route.from.x + route.to.x) / 2 + (route.from.y - route.to.y) * 0.08;
-                const midY = (route.from.y + route.to.y) / 2 + (route.to.x - route.from.x) * 0.08;
-                const d = `M ${route.from.x} ${route.from.y} Q ${midX} ${midY} ${route.to.x} ${route.to.y}`;
-
-                return (
-                  <path
-                    key={route.id}
-                    d={d}
-                    fill="none"
-                    stroke={route.active ? "rgb(var(--c-brass))" : "rgb(var(--c-sepia) / 0.45)"}
-                    strokeWidth={route.active ? "0.6" : "0.35"}
-                    strokeDasharray={route.active ? "1.5, 1.5" : "1.2, 1.8"}
-                    filter="url(#route-glow)"
-                    className="transition-all duration-300"
-                  />
-                );
-              })}
-            </svg>
-
-            {/* Animated Sea Galleon Ship Asset */}
-            <div
-              className="absolute pointer-events-none z-5 transition-transform duration-1000 hidden sm:block"
-              style={{
-                left: "14%",
-                top: "84%",
-                width: "7.5%",
-                transform: "translate(-50%, -50%)",
-              }}
-              title="The Explorer's Galleon"
-            >
-              <img
-                src="/assets/decorations/ship.webp"
-                alt="Galleon"
-                className="w-full h-auto drop-shadow-md animate-pulse"
-                style={{ animationDuration: "4s" }}
-                onError={(e) => { e.currentTarget.style.display = "none"; }}
-              />
-            </div>
-
-            {!mapError && user && <MapExplorer avatar={user.avatar} position={explorerPosition} />}
-
-            {/* Interactive Island Markers */}
-            {ISLANDS.map((island) => {
-              const islandProgress = getIslandProgress(island.id);
-              return (
-                <IslandMarker
-                  key={island.id}
-                  island={island}
-                  isSelected={selectedIslandId === island.id}
-                  onSelect={(isl) => setSelectedIslandId(isl.id)}
-                  progress={islandProgress}
-                />
-              );
-            })}
-
-            {/* Top Banner Plaque Overlay */}
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 pointer-events-none select-none hidden sm:block">
-              <span className="cartouche text-xs py-1 px-4 text-ink shadow-paper opacity-90 border border-ink/40">
-                ARCHIPELAGO DE ÆTHERIA
-              </span>
-            </div>
+      <OrnateFrame className="wm-frame">
+        <div className="wm-viewport" id="world-map-chart" data-expanded={expanded}>
+          <div className="wm-chart">
+            <WorldMapTerrain selectedIslandId={selectedIslandId} />
+            {explorer && <MapExplorer user={explorer} position={{ ...chartPosition(berth), label }} />}
+            {ISLANDS.map(island => <IslandMarker key={island.id} island={island}
+              position={chartPosition(WORLD_MAP_LAYOUT[island.id].label)}
+              isSelected={selectedIslandId === island.id} isCurrent={currentIsland?.id === island.id}
+              onSelect={() => setSelectedIslandId(island.id)} progress={getIslandProgress(island.id)} />)}
           </div>
-        </OrnateFrame>
-      </div>
+        </div>
+        <div className="wm-chart-footer">
+          <p className="wm-location"><Navigation size={15} aria-hidden="true" /> Explorer at <strong>{label}</strong></p>
+          <button type="button" className="wm-zoom btn-ghost" aria-controls="world-map-chart" aria-pressed={expanded}
+            onClick={() => setExpanded(value => !value)}>
+            {expanded ? <Minimize2 size={14} aria-hidden="true" /> : <Maximize2 size={14} aria-hidden="true" />}
+            {expanded ? "Whole chart" : "Enlarge chart"}
+          </button>
+          <p className="wm-pan-note" hidden={!expanded}>Swipe across the chart to explore.</p>
+        </div>
+      </OrnateFrame>
+      <ul className="wm-legend" aria-label="Island marker legend">
+        <li><Compass size={15} aria-hidden="true" /> Open</li>
+        <li><Navigation size={15} aria-hidden="true" /> Current expedition</li>
+        <li><Check size={15} aria-hidden="true" /> Charted</li>
+        <li><LockKeyhole size={15} aria-hidden="true" /> Locked</li>
+      </ul>
 
-      {/* Floating Viewport-Anchored Island Journal Panel via React Portal */}
-      {selectedIsland &&
-        createPortal(
-          <div
-            className="fixed inset-0 z-50 pointer-events-none"
-            role="region"
-            aria-label="Island Journal"
-          >
-            {/* Desktop & Mobile: Anchored fixed floating panel */}
-            <div
-              className="journal-viewport pointer-events-auto fixed left-3 sm:left-6 lg:left-8 w-[calc(100vw-24px)] sm:w-[420px] max-w-[420px] shadow-lift animate-fade-in"
-            >
-              <IslandInfoPanel
-                key={selectedIsland.id}
-                island={selectedIsland}
-                onClose={() => setSelectedIslandId(null)}
-              />
-            </div>
-          </div>,
-          document.body
-        )}
+      {selectedIsland && createPortal(
+        <div className="fixed inset-0 z-50 pointer-events-none" role="region" aria-label="Island Journal">
+          <div className="journal-viewport pointer-events-auto fixed left-3 sm:left-6 lg:left-8 w-[calc(100vw-24px)] sm:w-[420px] max-w-[420px] shadow-lift animate-fade-in">
+            <IslandInfoPanel key={selectedIsland.id} island={selectedIsland} onClose={() => setSelectedIslandId(null)} />
+          </div>
+        </div>, document.body
+      )}
     </div>
   );
 }
-
-

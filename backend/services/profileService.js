@@ -60,13 +60,13 @@ function buildJournal({ player, islands, missions, progress, badges, shopItems, 
 
   return {
     player,
-    stats: { missionsCompleted: completed.length, islandsExplored: expeditions.filter(island => island.completed > 0).length,
+    stats: { missionsCompleted: completed.length, puzzlesSolved: solvedPuzzles.length, islandsExplored: expeditions.filter(island => island.completed > 0).length,
       islandCount: expeditions.length, achievementsUnlocked: badges.summary.unlocked },
     expeditions,
-    achievements: { recent: earned.slice(0, 4), titles: badges.summary.titles,
+    achievements: { items: badges.items, summary: badges.summary, recent: earned.slice(0, 4), titles: badges.summary.titles,
       inProgress: badges.items.filter(item => item.status === "in-progress" && item.progress).slice(0, 3) },
     inventory: { count: ownedIds.size, equipped: cosmetics, recent: purchases.slice(0, 4),
-      ownedPreview: [...itemById.values()].slice(0, 4) },
+      owned: [...itemById.values()], ownedPreview: [...itemById.values()].slice(0, 4) },
     activity,
   };
 }

@@ -1,18 +1,19 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { ArrowRight, BookOpen, Check, ChevronDown, Compass, Hourglass, Lock, Map, Sparkles } from "lucide-react";
+import { Archive, ArrowRight, BookOpen, Check, ChevronDown, Compass, Hourglass, Lock, Map, Sparkles } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { listPuzzles } from "../services/puzzleService.js";
 import { getMe } from "../services/authService.js";
 import { useAuth } from "../hooks/useAuth.js";
 import { usePuzzleSession } from "../hooks/usePuzzleSession.js";
-import { ISLANDS } from "../data/islands.js";
+import { getIslandArtwork, ISLANDS } from "../data/islands.js";
 import { DetectiveBoard } from "../components/puzzles/DetectiveBoard.jsx";
 import { ArtifactArrangement } from "../components/puzzles/ArtifactArrangement.jsx";
 import { CipherDecoder } from "../components/puzzles/CipherDecoder.jsx";
 import { ExpeditionMaze } from "../components/puzzles/ExpeditionMaze.jsx";
 import { StructureWorkshop } from "../components/puzzles/StructureWorkshop.jsx";
 import { CodeRestoration } from "../components/puzzles/CodeRestoration.jsx";
-import { QuestFrame, QuestRibbon, QuestSeal } from "../components/puzzles/QuestOrnaments.jsx";
+import { PuzzleInsignia } from "../components/puzzles/PuzzleInsignia.jsx";
+import { QuestSeal } from "../components/puzzles/QuestOrnaments.jsx";
 import "../styles/puzzles.css";
 
 const modes = {
@@ -24,19 +25,13 @@ const modes = {
   code: ["Code Restoration", "The Scribe’s Blueprint", CodeRestoration],
 };
 const islandFor = id => ISLANDS.find(island => island.id === id);
+const islandArt = id => getIslandArtwork(id ?? "sorting-sands").illustration;
 const labels = { available: "Ready to begin", active: "In progress", skipped: "Set aside", completed: "Completed" };
 const feedback = {
   incorrect: "The relic remains sealed. Compare your solution with the trial’s conditions and try again.",
   incomplete: "The trial is unfinished. Check the objective and complete the missing steps.",
   invalid: "A move broke the rules of the trial. Revise your steps and try again.",
 };
-
-function JournalHeading({ children, eyebrow }) {
-  return <header className="pz-journal-heading">
-    {eyebrow && <p className="pz-kicker">{eyebrow}</p>}
-    <div className="pz-title-ribbon"><QuestRibbon/><h1>{children}</h1></div>
-  </header>;
-}
 
 function SectionTitle({ children }) {
   return <h3 className="pz-section-title"><QuestSeal/>{children}</h3>;
@@ -85,7 +80,9 @@ function PuzzleLobby() {
     normalizeTitle(row.title).includes(search));
   const selected = matching.find(row => row.puzzleId === (selectedId ?? data?.current?.puzzleId));
   const session = data?.history.find(row => row.id === selected?.sessionId);
-  const island = islandFor(selected?.islandId);
+  const completed = catalogue.filter(row => row.status === "completed");
+  const archived = matching.filter(row => row.status === "completed");
+  const isCurrent = selected && selected.puzzleId === data.current?.puzzleId;
   const until = data?.missionsToNext;
   const action = ({ active: "Resume puzzle", skipped: "Revisit trial", completed: "Read completed trial" })[selected?.sessionStatus] ?? "Play puzzle";
 
@@ -95,13 +92,22 @@ function PuzzleLobby() {
   }
 
   return <div className="pz-shell pz-lobby">
-    <QuestFrame/>
     <header className="pz-catalogue-header">
-      <JournalHeading eyebrow="The Ætherian expeditions">Quest Journal</JournalHeading>
+      <div className="pz-headquarters">
+        <div className="pz-headquarters-copy">
+          <p className="pz-kicker"><Compass size={17} aria-hidden="true"/> Ætherian expeditions · Quest Journal</p>
+          <h1>The Investigation <span>Chamber</span></h1>
+          <p>Every mystery leaves a trail. Examine the evidence, connect the clues, and uncover the truth.</p>
+        </div>
+        {data && <dl className="pz-headquarters-stats">
+          <div><dt>Coding missions solved</dt><dd>{data.missionsCompleted}</dd></div>
+          <div><dt>Cases assigned</dt><dd>{data.history.length}<span> / {catalogue.length}</span></dd></div>
+          <div><dt>Cases closed</dt><dd>{completed.length}</dd></div>
+        </dl>}
+      </div>
       {data && <section className="pz-catalogue-progress" aria-label="Next puzzle assignment">
-        <QuestSeal elaborate/>
+        <Hourglass size={20} aria-hidden="true"/>
         <div>
-          <p><strong>{data.missionsCompleted}</strong> successful coding {data.missionsCompleted === 1 ? "mission" : "missions"} · <strong>{data.history.length}</strong> of {catalogue.length} quests assigned</p>
           <p>{data.exhausted ? "All quests have been assigned." : data.nextReachable === false
             ? "The next assignment needs more coding missions than are currently published."
             : <><strong>{until} {until === 1 ? "mission" : "missions"} to the next assignment.</strong>{" "}
@@ -113,7 +119,10 @@ function PuzzleLobby() {
     {error ? <div className="pz-catalogue-message pz-readout" role="alert">{error.message} <button onClick={() => { setError(null); setRetry(value => value+1); }}>Retry</button></div> :
       !data ? <p className="pz-catalogue-message" role="status">Turning the pages…</p> : <>
       <nav className="pz-index" id="quest-islands" aria-label="Quest catalogue by island">
-        <h2 className="pz-index-title">Island Catalogue</h2>
+        <header className="pz-index-heading">
+          <p className="pz-kicker"><BookOpen size={15} aria-hidden="true"/> Investigation index</p>
+          <h2 className="pz-index-title">Island Catalogue</h2>
+        </header>
         <div className="pz-catalogue-filters">
           <label className="pz-field">Search puzzle titles
             <input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search the journal"/>
@@ -132,7 +141,7 @@ function PuzzleLobby() {
             const visible = matching.filter(row => row.islandId === chapter.id);
             return <details key={chapter.id} open className="pz-island-chapter">
               <summary className="pz-index-band">
-                <img src={chapter.image} alt="" loading="lazy" width="56" height="44"/>
+                <img src={islandArt(chapter.id)} alt="" loading="lazy" width="56" height="44"/>
                 <span><span className="pz-island-name">{quests[0]?.islandName ?? chapter.name}</span>
                   <small>{chapter.tagline}</small></span>
                 <span className="pz-island-count">{visible.length}/{quests.length}<ChevronDown size={15} aria-hidden="true"/></span>
@@ -147,33 +156,53 @@ function PuzzleLobby() {
           })}
         </div>
       </nav>
-      <section ref={preview} className="pz-archive-page" aria-label="Selected quest">
-        <QuestSeal className="pz-archive-watermark" elaborate/>
-        <QuestSeal className="pz-archive-signet" elaborate/>
-        <JournalHeading eyebrow={selected?.islandName ?? "Codyssey · Artifact Archive"}>{selected?.title ?? "An Unopened Chapter"}</JournalHeading>
-        <p className="pz-archive-copy">{selected?.synopsis ?? "Beneath the islands of Ætheria lie sealed relics and long-forgotten trials. Choose a quest from the island catalogue to read its entry."}</p>
-        <figure className="pz-location">
-          <img src={island?.image ?? "/assets/islands/sorting-sands.webp"} alt="" width="288" height="270"/>
-          <figcaption>{selected?.islandName ?? "Ruins of the Ætherian isles"}</figcaption>
-        </figure>
-        {selected && <div className="pz-archive-details">
-          <QuestStatus status={selected.status}/>
-          <ul className="pz-objectives">
-            <li><span aria-hidden="true">✦</span>{modes[selected.mechanic][0]} · {selected.difficulty}</li>
-            {session && <li><span aria-hidden="true">◇</span>Coding mission milestone {session.milestone}</li>}
-          </ul>
-          {selected.tags?.length > 0 && <p className="pz-note">{selected.tags.join(" · ")}</p>}
-          {selected.status === "upcoming" && <p>One successful coding mission remains before the next draw. This quest is a candidate.</p>}
-          {selected.status === "locked" && <p>This trial opens when it is assigned to your journal.</p>}
-          {selected.sessionStatus === "skipped" && <p className="pz-note">Set aside. Your notes are ready when you return.</p>}
-          {session && <>
-            <SectionTitle>Rewards</SectionTitle>
-            <div className="pz-reward-strip"><CoinReward coins={selected.status === "completed" ? session.coinsAwarded : session.coins} credited={selected.status === "completed"}/></div>
-          </>}
-          {selected.sessionId && <Link className="pz-link pz-primary" to={"/puzzles/" + selected.sessionId}>{action} <ArrowRight size={16}/></Link>}
-        </div>}
-        <a className="pz-link pz-back-to-islands" href="#quest-islands">Back to island catalogue</a>
-      </section>
+      <div className="pz-desk">
+        <section ref={preview} className="pz-dossier" aria-label="Selected quest" data-mechanic={selected?.mechanic}>
+          <header className="pz-dossier-tab">
+            <p className="pz-kicker"><Archive size={15} aria-hidden="true"/>{isCurrent ? "Current investigation" : selected?.status === "completed" ? "Closed investigation" : "Case dossier"}</p>
+            {selected && <QuestStatus status={selected.status}/>}
+          </header>
+          <div className="pz-dossier-body">
+            <div className="pz-dossier-copy">
+              <p className="pz-kicker">{selected?.islandName ?? "Ætherian case files"}</p>
+              <h2>{selected?.title ?? "An Unopened Chapter"}</h2>
+              <p className="pz-archive-copy">{selected?.synopsis ?? "Beneath the islands of Ætheria lie sealed relics and long-forgotten trials. Choose a quest from the island catalogue to read its entry."}</p>
+              {selected && <>
+                <p className="pz-dossier-meta"><PuzzleInsignia mechanic={selected.mechanic}/><span>{modes[selected.mechanic][0]}<small>{selected.difficulty}{session && ` · Coding mission milestone ${session.milestone}`}</small></span></p>
+                {selected.tags?.length > 0 && <p className="pz-note">{selected.tags.join(" · ")}</p>}
+                {selected.status === "upcoming" && <p>One successful coding mission remains before the next draw. This quest is a candidate.</p>}
+                {selected.status === "locked" && <p>This trial opens when it is assigned to your journal.</p>}
+                {selected.sessionStatus === "skipped" && <p className="pz-note">Set aside. Your notes are ready when you return.</p>}
+              </>}
+            </div>
+            <figure className="pz-location">
+              <img src={islandArt(selected?.islandId)} alt="" width="800" height="550"/>
+              <figcaption>{selected?.islandName ?? "Ruins of the Ætherian isles"}</figcaption>
+            </figure>
+          </div>
+          {selected?.sessionId && <footer className="pz-dossier-actions">
+            {session && <CoinReward coins={selected.status === "completed" ? session.coinsAwarded : session.coins} credited={selected.status === "completed"}/>}
+            <Link className="pz-link pz-primary" to={"/puzzles/" + selected.sessionId}>{action} <ArrowRight size={16} aria-hidden="true"/></Link>
+          </footer>}
+          <a className="pz-link pz-back-to-islands" href="#quest-islands">Back to island catalogue</a>
+        </section>
+        <section className="pz-case-archive" aria-labelledby="pz-archive-title">
+          <header><div><p className="pz-kicker"><Archive size={15} aria-hidden="true"/> Filed investigations</p><h2 id="pz-archive-title">Case Archive</h2></div>
+            <span className="pz-archive-count">{completed.length} closed</span></header>
+          {archived.length > 0 ? <ul className="pz-case-files">
+            {archived.map(row => <li key={row.puzzleId}>
+              <button type="button" data-mechanic={row.mechanic} aria-pressed={row.puzzleId === selected?.puzzleId} onClick={() => {
+                selectQuest(row.puzzleId);
+                if (!window.matchMedia("(max-width: 47rem)").matches) preview.current?.scrollIntoView({ block: "nearest" });
+              }}>
+                <img src={islandArt(row.islandId)} alt="" loading="lazy" width="110" height="76"/>
+                <span><strong>{row.title}</strong><small>{row.difficulty} · {modes[row.mechanic][0]}</small></span>
+                <Check size={18} aria-hidden="true"/>
+              </button>
+            </li>)}
+          </ul> : <p className="pz-note">{completed.length ? "No completed records match the catalogue filters." : "Closed cases will be filed here after you solve them."}</p>}
+        </section>
+      </div>
     </>}
   </div>;
 }
@@ -203,15 +232,23 @@ function PuzzleRoom({ id }) {
   const discoveries = puzzle ? findings[puzzle.mechanic](puzzle.data, draft).filter(Boolean) : [];
   const solved = row?.status === "completed";
   return <div className="pz-shell pz-quest" data-mechanic={puzzle?.mechanic}>
-    <QuestFrame/>
-    <Link className="pz-link pz-back" to="/puzzles">← Quest Journal</Link>
-    <JournalHeading eyebrow={puzzle ? island?.name + " · " + mode : "The Ætherian expeditions"}>{puzzle?.title ?? "Opening the Journal"}</JournalHeading>
+    <header className="pz-room-heading">
+      <Link className="pz-link pz-back" to="/puzzles">← Quest Journal</Link>
+      <div className="pz-room-title">
+        {puzzle && <PuzzleInsignia mechanic={puzzle.mechanic}/>}
+        <div>
+          <p className="pz-kicker">{puzzle ? island?.name + " · " + mode : "The Ætherian expeditions"}</p>
+          <h1>{puzzle?.title ?? "Opening the Journal"}</h1>
+        </div>
+      </div>
+      {row && <p className="pz-room-stamp"><span>{puzzle.difficulty}</span><strong>{labels[row.status]}</strong></p>}
+    </header>
     {error && <div className="pz-readout pz-feedback" role="alert">{error.message} <button disabled={busy} onClick={reload}>Reload saved state</button></div>}
     {!row && !error && <p className="pz-readout" role="status">Unsealing the page…</p>}
     {row && <div className="pz-room">
       <aside className="pz-brief">
-        <h2 className="pz-column-title"><BookOpen size={20}/> Quest Journal</h2>
-        <figure className="pz-brief-art"><img src={island?.image ?? "/assets/islands/sorting-sands.webp"} alt="" width="288" height="270"/></figure>
+        <h2 className="pz-column-title"><BookOpen size={20} aria-hidden="true"/> Case Brief</h2>
+        <figure className="pz-brief-art"><img src={islandArt(island?.id)} alt="" width="800" height="550"/><figcaption>{island?.name ?? "Ætherian isles"}</figcaption></figure>
         <p>{puzzle.story}</p>
         <SectionTitle>Objective</SectionTitle><p>{puzzle.objective}</p>
         <SectionTitle>Instructions</SectionTitle><p>{puzzle.instructions}</p>
@@ -221,7 +258,7 @@ function PuzzleRoom({ id }) {
         <p className="pz-note">Quest status: {labels[row.status]}</p>
       </aside>
       <section className="pz-arena" aria-label={mode}>
-        <header className="pz-trial-head"><QuestSeal/><p className="pz-kicker">Ancient Trial</p><h2>{chamber}</h2></header>
+        <header className="pz-trial-head"><PuzzleInsignia mechanic={puzzle.mechanic}/><div><p className="pz-kicker">{mode}</p><h2>{chamber}</h2></div></header>
         {solved ? <div className="pz-discovery">
           <QuestSeal elaborate className="pz-discovery-seal"/>
           {row.awarded && <div className="pz-discovery-sparks" aria-hidden="true"><span>✧</span><span>✦</span><span>✧</span></div>}
@@ -237,7 +274,7 @@ function PuzzleRoom({ id }) {
             <p>{row.status === "skipped" ? "Your notes are right where you left them." : "The relic’s inscription is sealed. Open the trial to begin."}</p>
             <button className="pz-primary" disabled={busy || Boolean(error)} onClick={() => act("start")}>{row.status === "skipped" ? "Revisit puzzle" : "Begin trial"}</button>
           </div>}
-        {!solved && row.verdict && !saving && <p className="pz-readout pz-feedback" role="status">{feedback[row.verdict]}</p>}
+        {!solved && row.verdict && !saving && <p className="pz-readout pz-feedback" data-verdict={row.verdict} role="status">{feedback[row.verdict]}</p>}
       </section>
       <aside className="pz-support">
         <h2 className="pz-column-title"><Compass size={20}/> Expedition Record</h2>
