@@ -247,7 +247,6 @@ codyssey/
 │       └── styles/
 │
 ├── API_CONTRACT.md
-├── AGENTS.md
 ├── package.json
 └── README.md
 ```
